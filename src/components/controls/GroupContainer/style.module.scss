@@ -1,0 +1,51 @@
+.group_container_wrapper {
+  display: flex;
+  align-items: flex-start;
+  column-gap: 0px;
+  // Form 包裹情况下css
+  :global(.semi-form-field) {
+    &:first-child {
+      .group_item {
+        border-top-right-radius: 0px !important;
+        border-bottom-right-radius: 0px !important;
+      }
+    }
+  }
+  :global(.semi-form-field + .semi-form-field) {
+    .group_item {
+      border-top-left-radius: 0px !important;
+      border-bottom-left-radius: 0px !important;
+      position: relative;
+      &::before {
+        content: "";
+        background-color: #1c1f2314;
+        width: 1px;
+        position: absolute;
+        left: -1px;
+        top: 1px;
+        bottom: 1px;
+      }
+    }
+  }
+  // 无Form包裹情况下css
+  .group_item {
+    &:first-child {
+      border-top-right-radius: 0px !important;
+      border-bottom-right-radius: 0px !important;
+    }
+  }
+  .group_item + .group_item {
+    border-top-left-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    position: relative;
+    &::before {
+      content: "";
+      background-color: #1c1f2314;
+      width: 1px;
+      position: absolute;
+      left: 0px;
+      top: 1px;
+      bottom: 1px;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+.empty-text {
+  flex: 1;
+  overflow: 'scroll';
+  padding: 40px;
+}
+
+:global {
+  .diff-wrapper {
+    flex: 1;
+    overflow: scroll;
+  }
+}

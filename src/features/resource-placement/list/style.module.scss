@@ -1,0 +1,19 @@
+.resourcePlacementList {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f6f7f9;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f6f7f9;
+}
+
+.table-operate-columns {
+  display: flex;
+  width: 300px;
+  flex-wrap: wrap;
+}

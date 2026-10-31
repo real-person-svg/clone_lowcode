@@ -1,0 +1,15 @@
+.basic-input-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  .semi-form-field {
+    flex: 1;
+  }
+  .semi-form-field-error-message {
+    position: absolute;
+  }
+}
+.semi-upload-picture-file-card,
+.semi-upload-add {
+  border-radius: 5px !important;
+}

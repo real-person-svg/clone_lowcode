@@ -1,0 +1,8 @@
+@use '../style.common.scss';
+
+.control_date_picker {
+  @extend %default_interactive_control;
+  :global(.semi-datepicker-input) {
+    border-radius: 5px !important;
+  }
+}

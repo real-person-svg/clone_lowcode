@@ -1,0 +1,57 @@
+@use '../style.common.scss';
+
+.control_input_tag_panel {
+  display: flex;
+  flex-direction: column;
+  .input_wrapper {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+    .raw_input {
+      width: 250px;
+      border-radius: 5px;
+    }
+    .add_icon {
+      border-radius: 50%;
+    }
+  }
+
+  .result_panel {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border: 1px dashed #3c3f4582;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    .tag_group {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: 5px;
+      column-gap: 10px;
+    }
+    .clear_btn {
+      flex: 20px 0 0;
+      height: fit-content;
+      visibility: hidden;
+      pointer-events: none;
+      color: #1c1c2399;
+      padding: 5px;
+    }
+    &:hover {
+      .clear_btn {
+        visibility: visible;
+        pointer-events: all;
+      }
+    }
+  }
+
+  &.row_direction {
+    flex-direction: row;
+    column-gap: 20px;
+    .result_panel {
+      flex: 1;
+    }
+  }
+}

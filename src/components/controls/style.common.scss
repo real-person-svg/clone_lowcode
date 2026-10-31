@@ -1,0 +1,12 @@
+$default-border-radius: 5px;
+
+%default_interactive_control {
+  width: 250px;
+  border-radius: $default-border-radius;
+}
+
+%default_control_button {
+  width: 100px;
+  border-radius: $default-border-radius;
+  margin-right: 0px !important;
+}

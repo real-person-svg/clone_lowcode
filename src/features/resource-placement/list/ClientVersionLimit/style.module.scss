@@ -1,0 +1,32 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group {
+  flex: 1;
+}
+
+.operator {
+  min-width: 96px;
+}
+
+.version {
+  flex: 1;
+}
+
+.remove {
+  color: var(--semi-color-tertiary);
+}
+
+.add {
+  align-self: flex-start;
+  margin-top: 4px;
+}

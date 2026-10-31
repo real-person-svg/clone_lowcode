@@ -1,0 +1,12 @@
+{
+  "productionDeepLink": 200,
+  "usesBuiltAssets": true,
+  "devClientAbsent": true,
+  "currentEnvironmentId": 1,
+  "onlineFallbackId": 2,
+  "missingConfigured": false,
+  "deletedDetail": 404,
+  "deletedHistory": 4,
+  "emptyTotal": 0,
+  "persistentUploadedPngs": 4
+}

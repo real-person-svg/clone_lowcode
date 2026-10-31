@@ -1,0 +1,27 @@
+.header_wrapper {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  padding: 20px 20px 10px;
+  margin-bottom: 20px;
+  position: relative;
+  .breadcrumb {
+    margin-bottom: 5px;
+  }
+  .title {
+    height: 30px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .operate_wrapper {
+    display: flex;
+    justify-content: end;
+    gap: 20px;
+    padding: 5px 20px 0px;
+    .operate_btn {
+      width: auto;
+      border-radius: 5px;
+      margin-right: 0px !important;
+    }
+  }
+}

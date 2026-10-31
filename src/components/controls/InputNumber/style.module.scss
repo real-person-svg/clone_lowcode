@@ -1,0 +1,5 @@
+@use '../style.common.scss';
+
+.control_input_number {
+  @extend %default_interactive_control;
+}

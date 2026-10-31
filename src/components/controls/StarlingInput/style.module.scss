@@ -1,0 +1,33 @@
+.starling_wrapper {
+  display: flex;
+  align-items: center;
+  .starling_type_select {
+    width: 100px;
+  }
+  .starling_extra_info_add {
+    margin-left: 10px;
+    color: #0064fa;
+    font-weight: 600;
+    font-size: 14px;
+    &:hover {
+      cursor: pointer;
+    }
+    &.add_disabled {
+      color: #00000040;
+      pointer-events: none;
+      &:hover {
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.starling_variable_dialog {
+  .content_wrapper {
+    display: flex;
+    flex-direction: column;
+    .item_content {
+
+    }
+  }
+}

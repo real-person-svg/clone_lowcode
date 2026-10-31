@@ -1,0 +1,137 @@
+@use '../style.common.scss';
+
+.control_select {
+  @extend %default_interactive_control;
+}
+
+.select_all {
+  height: 36px;
+  display: flex;
+  padding-left: 40px;
+  align-items: center;
+  cursor: pointer;
+  // border-top: 1px solid var(--semi-color-border);
+  border-radius: 0 0 6px 6px;
+}
+
+.select_all:hover {
+  background-color: var(--semi-color-fill-0);
+}
+
+.selected_count {
+  // position: absolute;
+  margin-left: 20px;
+}
+
+/* ===== 大区（含多个国家/地区）友好展示 ===== */
+.region_option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.region_option_name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.region_badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--semi-color-primary);
+  background-color: var(--semi-color-primary-light-default);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.region_badge:hover {
+  background-color: var(--semi-color-primary-light-hover);
+}
+
+.region_badge_text {
+  white-space: nowrap;
+}
+
+.region_popover {
+  min-width: 200px;
+  max-width: 280px;
+  padding: 8px 4px;
+}
+
+.region_popover_title {
+  padding: 0 8px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--semi-color-text-1);
+  border-bottom: 1px solid var(--semi-color-border);
+  margin-bottom: 4px;
+}
+
+.region_popover_list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.region_popover_item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.region_popover_item:hover {
+  background-color: var(--semi-color-fill-0);
+}
+
+.region_popover_item.is_disabled {
+  opacity: 0.55;
+}
+
+.region_popover_code {
+  flex-shrink: 0;
+  min-width: 34px;
+  font-weight: 600;
+  color: var(--semi-color-text-2);
+}
+
+.region_popover_name {
+  flex: 1;
+  color: var(--semi-color-text-0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.region_popover_flag {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--semi-color-warning);
+}
+
+.region_selected {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.region_selected_count {
+  color: var(--semi-color-text-2);
+  font-size: 12px;
+}
+
+.region_tag {
+  max-width: 100%;
+}

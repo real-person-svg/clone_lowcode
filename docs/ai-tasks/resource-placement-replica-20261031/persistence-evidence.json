@@ -1,0 +1,26 @@
+{
+  "effective": 12,
+  "total": 14,
+  "assets": 4,
+  "copyPreservedConfig": true,
+  "copyHistory": [
+    "CREATE",
+    "UNABLE",
+    "ENABLE",
+    "DELETE"
+  ],
+  "childEmptyConfig": true,
+  "childAlgorithmAndExperimentFlags": [
+    1,
+    1
+  ],
+  "publishedLaneCleaned": true,
+  "publishedId": 14,
+  "finalTreePaths": [
+    "config.first",
+    "second"
+  ],
+  "paletteComponentCount": 17,
+  "rollbacks": 3,
+  "defaultDataDirectoryExists": false
+}

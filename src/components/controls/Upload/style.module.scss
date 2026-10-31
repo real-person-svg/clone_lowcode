@@ -1,0 +1,21 @@
+.control_upload_wrapper {
+
+  :global(.semi-upload-picture-file-card) {
+    border: 1px solid #d9d9d9;
+    border-radius: 5px !important;
+    box-sizing: border-box;
+
+    img {
+      border-radius: 5px;
+    }
+  }
+
+  :global(.semi-upload-add) {
+    border-radius: 5px !important;
+    border-width: 1px !important;
+  }
+
+  .list_add_btn {
+    border-radius: 5px;
+  }
+}

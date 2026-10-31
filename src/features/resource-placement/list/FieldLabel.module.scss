@@ -1,0 +1,27 @@
+.label_wrapper {
+  display: flex;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 14px;
+  font-weight: 400;
+  min-height: 20px;
+  margin-bottom: 8px;
+  .tips {
+    position: relative;
+  }
+  .is_require::after {
+    content: '*';
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    color: red;
+  }
+  .tips_icon {
+    margin-left: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+}

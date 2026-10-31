@@ -1,0 +1,49 @@
+.control_upload_wrapper {
+  margin: 2px !important;
+  :global(.semi-upload-picture-file-card) {
+    padding: 5px;
+    border: 1px solid #d9d9d9;
+    border-radius: 5px !important;
+
+  }
+  :global(.semi-upload-add) {
+    padding: 5px;
+    border-radius: 5px !important;
+    border-width: 1px !important;
+  }
+  :global(.semi-upload-picture-file-card::before) {
+    left: 5px;
+    right: 5px;
+    top: 5px;
+    bottom: 5px;
+  }
+  .list_add_btn {
+    border-radius: 5px;
+  }
+}
+
+.starling_list_show_btn {
+  width: 120px;
+  margin-bottom: 10px;
+  margin-left: 20px;
+}
+
+.popover_card_wrapper {
+  width: 400px;
+}
+
+.popover_card_content {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.popover_card_content_center {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.delete_button:hover {
+  cursor: pointer;
+}

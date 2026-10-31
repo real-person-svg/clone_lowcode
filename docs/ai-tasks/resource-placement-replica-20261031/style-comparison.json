@@ -1,0 +1,142 @@
+[
+  {
+    "target": "src/components/Header.module.scss",
+    "source": "components/header/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/features/resource-placement/list/style.module.scss",
+    "source": "routes/resourcePlacementManage/lowcode/list/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/features/resource-placement/list/FilterSearch.module.scss",
+    "source": "components/FilterSearch/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/features/resource-placement/list/SimpleTable.module.scss",
+    "source": "components/SimpleTable/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/features/resource-placement/list/ConfigDiffModal/style.module.scss",
+    "source": "components/ConfigDiffModal/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/features/resource-placement/list/ClientVersionLimit/style.module.scss",
+    "source": "components/controls/ClientVersionLimit/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/features/resource-placement/editor/style.module.scss",
+    "source": "routes/resourcePlacementManage/lowcode/editor/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/style.common.scss",
+    "source": "components/controls/style.common.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/RadioGroup/style.module.scss",
+    "source": "components/controls/RadioGroup/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/TagInput/style.module.scss",
+    "source": "components/controls/TagInput/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Tooltip/style.module.scss",
+    "source": "components/controls/Tooltip/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Card/style.module.scss",
+    "source": "components/controls/Card/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/WrapContainer/style.module.scss",
+    "source": "components/controls/WrapContainer/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/StarlingUpload/style.module.scss",
+    "source": "components/controls/StarlingUpload/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/CheckboxGroup/style.module.scss",
+    "source": "components/controls/CheckboxGroup/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/StarlingInput/style.module.scss",
+    "source": "components/controls/StarlingInput/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Title/style.module.scss",
+    "source": "components/controls/Title/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Input/style.module.scss",
+    "source": "components/controls/Input/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/StarlingSchema/style.module.scss",
+    "source": "components/controls/StarlingSchema/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/ColumnContainer/style.module.scss",
+    "source": "components/controls/ColumnContainer/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/DatePicker/style.module.scss",
+    "source": "components/controls/DatePicker/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/GroupContainer/style.module.scss",
+    "source": "components/controls/GroupContainer/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/InputNumber/style.module.scss",
+    "source": "components/controls/InputNumber/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Container/style.module.scss",
+    "source": "components/controls/Container/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/ColorPicker/style.module.scss",
+    "source": "components/controls/ColorPicker/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Switch/style.module.scss",
+    "source": "components/controls/Switch/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Select/style.module.scss",
+    "source": "components/controls/Select/style.module.scss",
+    "normalizedEqual": true
+  },
+  {
+    "target": "src/components/controls/Upload/style.module.scss",
+    "source": "components/controls/Upload/style.module.scss",
+    "normalizedEqual": true
+  }
+]

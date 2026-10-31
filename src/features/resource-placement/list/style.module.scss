@@ -1,19 +1,26 @@
 .resourcePlacementList {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: #f6f7f9;
+}
+
+.header.header {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+
+  > :last-child {
+    padding: 0;
+  }
 }
 
 .content {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  background: #f6f7f9;
-}
-
-.table-operate-columns {
-  display: flex;
-  width: 300px;
-  flex-wrap: wrap;
+  padding-bottom: 20px;
 }

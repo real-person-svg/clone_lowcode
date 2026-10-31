@@ -1,0 +1,104 @@
+.canvas {
+  flex: 1;
+  min-height: 0;
+  padding: 0 16px 16px 16px;
+  overflow-y: auto;
+  position: relative;
+
+  &.emptyCanvas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &.dropOver {
+    background: rgba(var(--semi-color-primary-rgb), 0.05);
+    border: 2px dashed var(--semi-color-primary);
+  }
+}
+
+.canvasContent {
+  min-height: 100%;
+  margin-top: 12px;
+}
+
+.componentWrapper {
+  position: relative;
+  margin-bottom: 8px;
+
+  &.selected {
+    border: 1px solid #1890ff;
+    outline-offset: 2px;
+  }
+
+  &.dragging {
+    opacity: 0.5;
+  }
+
+  &.dropOver {
+    background: rgba(var(--semi-color-primary-rgb), 0.05);
+  }
+}
+
+.componentToolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 32px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 4px;
+  padding: 0 0 0 8px;
+  font-size: 12px;
+  z-index: 10;
+}
+
+.toolbarActions {
+  display: flex;
+  font-weight: 500;
+  color: white;
+  height: 20px;
+  background-color: #1890ff;
+  padding: 0 3px;
+}
+
+.componentContent {
+  position: relative;
+}
+
+.dropIndicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--semi-color-primary);
+  z-index: 5;
+  pointer-events: none;
+
+  &.before {
+    top: -1px;
+  }
+
+  &.after {
+    bottom: -1px;
+  }
+
+  &.inside {
+    top: 50%;
+    transform: translateY(-50%);
+    height: 100%;
+    background: rgba(var(--semi-color-primary-rgb), 0.1);
+    border: 2px dashed var(--semi-color-primary);
+  }
+}
+
+.unknownComponent {
+  padding: 16px;
+  border: 1px dashed var(--semi-color-border);
+  text-align: center;
+  color: var(--semi-color-text-2);
+  background: var(--semi-color-fill-0);
+}
+

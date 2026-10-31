@@ -1,0 +1,33 @@
+.wrapper {
+  padding: 20px;
+  margin: 0 20px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid rgb(242, 244, 247);
+  box-shadow:
+    rgb(234, 236, 240) 0 0 1px,
+    rgba(29, 41, 57, 0.08) 0 1px 2px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+
+  > :global(.semi-form-field) {
+    min-width: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  padding-top: 5px;
+
+  > button {
+    width: 100px;
+    border-radius: 5px;
+  }
+}

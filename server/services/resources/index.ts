@@ -8,6 +8,7 @@ import { ServiceError } from '../../errors';
 import { validateResource } from './validation';
 import { ensureUniqueResource } from './identity';
 import { publishResource } from './publish';
+import { getUpdateMetadata } from './metadata';
 
 export class ResourceService {
   constructor(
@@ -113,9 +114,7 @@ export class ResourceService {
       const next = this.repository.save({
         ...old,
         ...data,
-        updatedAt: time,
-        updater: this.operator,
-        revision: old.revision + 1
+        ...getUpdateMetadata(old, time, this.operator)
       });
 
       this.repository.log('UPDATE', old, next, id, time, this.operator);
@@ -131,9 +130,7 @@ export class ResourceService {
       const next = this.repository.save({
         ...old,
         status,
-        updatedAt: time,
-        updater: this.operator,
-        revision: old.revision + 1
+        ...getUpdateMetadata(old, time, this.operator)
       });
 
       this.repository.log(
@@ -160,9 +157,7 @@ export class ResourceService {
       this.repository.save({
         ...old,
         status: 2,
-        updatedAt: time,
-        updater: this.operator,
-        revision: old.revision + 1
+        ...getUpdateMetadata(old, time, this.operator)
       });
 
       this.repository.log('DELETE', old, undefined, id, time, this.operator);
@@ -211,9 +206,7 @@ export class ResourceService {
         status: snapshot.status,
         creator: old.creator,
         createdAt: old.createdAt,
-        updater: this.operator,
-        updatedAt: time,
-        revision: old.revision + 1
+        ...getUpdateMetadata(old, time, this.operator)
       });
 
       this.repository.log('ROLL', old, next, id, time, this.operator);

@@ -1,27 +1,17 @@
-import { isUndefined, omitBy, toString } from 'lodash';
+import { isUndefined, omitBy } from 'lodash';
 
-import { ComponentInstance } from './types';
-import { getIsDeepComponent } from './utils';
+import type { ComponentInstance } from './types';
+import { generateComponentId, getIsDeepComponent } from './utils';
 import { canContainChildren } from './componentCapabilities';
 import { parseConfig, validateConfig } from '@shared/config';
-/**
- * 保存时，将组件的数据结构转换为 TCC 的配置格式
- * @param component - 组件实例
- * @param parentPath - 父级路径
- * @returns 转换后的配置对象
- */
+
 function transformComponent(component: ComponentInstance, parentPath?: string) {
   const { properties } = component;
 
-  // 生成 path
   const path =
     properties.path && parentPath
       ? `${parentPath}.${properties.path}`
       : properties.path || '';
-  // const key = parentPath ? `${parentPath}.${properties.key}` : properties.key;
-
-  // 解析 cProps
-  // eslint-disable-next-line no-eval
   let cProps;
   try {
     cProps = properties.cProps ? JSON.parse(properties.cProps) : undefined;
@@ -36,19 +26,19 @@ function transformComponent(component: ComponentInstance, parentPath?: string) {
   ) {
     throw new Error('cProps 必须是 JSON 对象');
   }
-  // 构建基础配置对象
   const config: any = omitBy(
     {
       ...component.properties,
-      key: path, // 兼容 TCC 的数据得保留 key，key 通常跟 path 一致，不暴露输入给用户，在这里直接取 path 的值
+      // 旧配置消费者仍读取 key；编辑器只编辑 path，保存时保持两者一致。
+      key: path,
       path,
       cProps,
     },
     isUndefined,
   );
 
-  // 递归处理子组件
   if (component.children && component.children.length > 0) {
+    // 普通布局不增加字段层级；数组子项从每一行读取相对路径。
     config.children = component.children.map((child) =>
       transformComponent(
         child,
@@ -60,14 +50,9 @@ function transformComponent(component: ComponentInstance, parentPath?: string) {
   return config;
 }
 
-/**
- * 将编辑器数据转换为 tcc 数据结构
- * @param components - 编辑器组件数组
- * @returns 转换后的配置数据
- */
 export function transformEditorDataToConfig(components: ComponentInstance[]) {
   try {
-    // 如果整个资源位配置都只有一个 array，则无需添加 config 前缀
+    // 兼容根数组直接占用 config 的旧格式，避免生成 config.config。
     const isSingleArrayConfig =
       components.length === 1 &&
       getIsDeepComponent(components[0]) &&
@@ -85,34 +70,19 @@ export function transformEditorDataToConfig(components: ComponentInstance[]) {
   }
 }
 
-/**
- * 生成唯一的组件ID
- * @returns 唯一ID字符串
- */
-function generateUniqueId(): string {
-  return `component_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-/**
- * 转换单个配置项为组件实例
- * @param configItem - 配置项
- * @param parentId - 父组件ID
- * @returns 组件实例
- */
 function transformConfigItemToComponent(
   configItem: any,
   parentId?: string,
 ): ComponentInstance {
-  // 构建组件属性，需要处理path字段去掉config前缀
   const properties = {
     ...configItem,
-    type: configItem.type, // 保持原始type用于保存
-    key: configItem.key || configItem.path, // 如果缺少 key 或 path，则取另一个的值，tcc 的不少配置不是少这少那的
+    type: configItem.type,
+    // 旧配置可能只有 key 或 path，导入时互相补齐，保留原始 type 别名。
+    key: configItem.key || configItem.path,
     path: configItem.path || configItem.key,
-    cProps: JSON.stringify(configItem.cProps), // 保持字符串格式
+    cProps: JSON.stringify(configItem.cProps),
   };
 
-  // 处理path字段，去掉config.前缀
   if (properties.path?.startsWith('config.')) {
     properties.path = properties.path.substring(7);
   }
@@ -120,16 +90,16 @@ function transformConfigItemToComponent(
     properties.key = properties.key.substring(7);
   }
 
-  // 移除不需要的字段
+  // children 属于编辑器树，不进入属性表单或后续属性透传。
   delete properties.children;
 
   const component: ComponentInstance = {
-    id: generateUniqueId(),
+    id: generateComponentId(),
     properties,
     parent: parentId,
   };
 
-  // 处理子组件
+  // 先生成父节点 ID，再创建子节点，保证 parent 始终指向本次导入的父节点。
   if (canContainChildren(configItem.type)) {
     component.children = (configItem.children || []).map((child: any) =>
       transformConfigItemToComponent(child, component.id),
@@ -139,11 +109,6 @@ function transformConfigItemToComponent(
   return component;
 }
 
-/**
- * 初始化时，将 TCC 的配置数据转换为编辑器数据格式
- * @param configData - 配置数据字符串
- * @returns 编辑器组件数组
- */
 export function transformConfigToEditorData(
   configData: string,
 ): ComponentInstance[] {

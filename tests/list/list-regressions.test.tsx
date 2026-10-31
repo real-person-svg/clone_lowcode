@@ -28,19 +28,26 @@ import {
 import { Toast } from '@douyinfe/semi-ui';
 import BasicInfoSheet from '../../src/features/resource-placement/list/BasicInfoSheet';
 import ConfigDiffModal from '../../src/features/resource-placement/list/operation-logs/ConfigDiffModal';
+import OperationLogModal from '../../src/features/resource-placement/list/operation-logs';
 import { api } from '../../src/features/resource-placement/api/client';
 import { resource, originalConfig } from './fixtures';
 vi.mock('react-diff-viewer', () => ({
   default: ({
     leftTitle,
-    rightTitle
+    rightTitle,
+    oldValue,
+    newValue
   }: {
     leftTitle: React.ReactNode;
     rightTitle: React.ReactNode;
+    oldValue: string;
+    newValue: string;
   }) => (
     <div>
       <div data-testid="diff-before">{leftTitle}</div>
       <div data-testid="diff-after">{rightTitle}</div>
+      <pre data-testid="diff-before-value">{oldValue}</pre>
+      <pre data-testid="diff-after-value">{newValue}</pre>
     </div>
   ),
   DiffMethod: { WORDS: 'words' }
@@ -48,6 +55,45 @@ vi.mock('react-diff-viewer', () => ({
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+});
+it('操作日志接入真实快照过滤与Diff格式化，关闭Diff不关闭日志', async () => {
+  const getLogs = vi.spyOn(api, 'getOperationLogs').mockResolvedValue({
+    list: [{
+      versionId: 12,
+      resourcePlacementId: 1,
+      operationType: 'UPDATE',
+      oldConfig: '{"resourceName":"之前","creator":"a","revision":1,"configData":"{\\"z\\":2,\\"a\\":1}"}',
+      newConfig: '{"resourceName":"之后","updater":"b","updatedAt":"now","configData":"{\\"z\\":1,\\"a\\":false}"}',
+      operator: 'local',
+      operationTime: '2026-01-01T00:00:00.000Z'
+    }],
+    total: 1,
+    page: 1,
+    pageSize: 10
+  });
+  const onClose = vi.fn();
+  render(<OperationLogModal resourceId={1} onClose={onClose} loadData={() => undefined} />);
+  fireEvent.click(await screen.findByText('比对变更'));
+  expect(getLogs).toHaveBeenCalledWith({ resourcePlacementId: 1, page: 1, pageSize: 10 });
+  expect(screen.getByTestId('diff-before-value').textContent).toBe(`{
+  "configData": {
+    "a": 1,
+    "z": 2
+  },
+  "resourceName": "之前"
+}`);
+  expect(screen.getByTestId('diff-after-value').textContent).toBe(`{
+  "configData": {
+    "a": false,
+    "z": 1
+  },
+  "resourceName": "之后"
+}`);
+  const diffDialog = screen.getByText('差异比对').closest('.semi-modal-content')!;
+  fireEvent.click(within(diffDialog as HTMLElement).getByRole('button', { name: 'close' }));
+  await waitFor(() => expect(screen.queryByTestId('diff-after-value')).toBeNull());
+  expect(screen.getByText('操作日志')).toBeTruthy();
+  expect(onClose).not.toHaveBeenCalled();
 });
 it('实际Semi复制侧栏提交保留普通/数组/函数字符串配置，并生成新身份', async () => {
   const create = vi

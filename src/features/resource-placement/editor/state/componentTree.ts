@@ -1,6 +1,7 @@
 import { isEqual } from 'lodash';
 
 import { ComponentInstance } from '../configuration/types';
+import { findComponentById } from '../configuration/utils';
 import {
   canContainChildren,
   getTypeChangeError,
@@ -72,35 +73,19 @@ export const insertTreeNode = (
     : insert(nodes);
 };
 
-const findNode = (
-  nodes: ComponentInstance[],
-  id: string,
-): ComponentInstance | undefined => {
-  for (const node of nodes) {
-    if (node.id === id) {
-      return node;
-    }
-    const found = node.children && findNode(node.children, id);
-    if (found) {
-      return found;
-    }
-  }
-  return undefined;
-};
-
 export const moveTreeNode = (
   nodes: ComponentInstance[],
   dragId: string,
   hoverId: string,
   position: 'before' | 'after' | 'inside',
 ): ComponentInstance[] => {
-  const dragged = findNode(nodes, dragId);
-  const target = findNode(nodes, hoverId);
+  const dragged = findComponentById(nodes, dragId);
+  const target = findComponentById(nodes, hoverId);
   if (
     !dragged ||
     !target ||
     dragId === hoverId ||
-    findNode(dragged.children || [], hoverId)
+    findComponentById(dragged.children || [], hoverId)
   ) {
     return nodes;
   }

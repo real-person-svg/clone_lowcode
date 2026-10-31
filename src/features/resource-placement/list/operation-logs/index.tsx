@@ -3,6 +3,7 @@ import { Modal, Table, Button, Typography, Toast } from '@douyinfe/semi-ui';
 import type { OperationLog, PageResult } from '@shared/types';
 import { api } from '../../api/client';
 import ConfigDiffModal from './ConfigDiffModal';
+import { parseLogSnapshot } from './snapshots';
 const types: Record<string, string> = {
   CREATE: '创建资源位',
   UPDATE: '更新配置',
@@ -69,20 +70,6 @@ export default function OperationLogModal({
         }
       }
     });
-  const format = (value: string) => {
-    if (!value) return undefined;
-    const parsed = JSON.parse(value);
-    for (const key of [
-      'creator',
-      'updater',
-      'createdAt',
-      'updatedAt',
-      'revision',
-      'from'
-    ])
-      delete parsed[key];
-    return parsed;
-  };
   return (
     <>
       <Modal
@@ -157,8 +144,8 @@ export default function OperationLogModal({
       {diff && (
         <ConfigDiffModal
           visible
-          oldConfig={format(diff.oldConfig)}
-          newConfig={format(diff.newConfig)}
+          oldConfig={parseLogSnapshot(diff.oldConfig)}
+          newConfig={parseLogSnapshot(diff.newConfig)}
           onClose={() => setDiff(undefined)}
         />
       )}

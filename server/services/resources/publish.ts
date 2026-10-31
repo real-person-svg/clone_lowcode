@@ -1,6 +1,7 @@
 import type { ResourcePlacement } from '../../../shared/types';
 import type { ResourceRepository } from '../../repositories/resources';
 import { ServiceError } from '../../errors';
+import { getUpdateMetadata } from './metadata';
 
 // The caller owns the transaction that also protects source cleanup and logs.
 export function publishResource(
@@ -40,9 +41,7 @@ export function publishResource(
         env: 'online',
         creator: online.creator,
         createdAt: online.createdAt,
-        updater: operator,
-        updatedAt: time,
-        revision: online.revision + 1
+        ...getUpdateMetadata(online, time, operator)
       })
     : repository.insert({
         ...source,
@@ -67,9 +66,7 @@ export function publishResource(
     repository.save({
       ...source,
       status: 2,
-      updatedAt: time,
-      updater: operator,
-      revision: source.revision + 1
+      ...getUpdateMetadata(source, time, operator)
     });
     repository.log(
       'DELETE',

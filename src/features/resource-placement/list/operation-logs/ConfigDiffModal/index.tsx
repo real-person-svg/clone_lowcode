@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Modal, Typography, Toast } from '@douyinfe/semi-ui';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 import type { ReactDiffViewerStylesOverride } from 'react-diff-viewer';
+import { formatDiffConfig } from '../snapshots';
 
 import styles from './style.module.scss';
 
@@ -24,50 +25,13 @@ const ConfigDiffModal: React.FC<Props> = ({
   newConfig,
   onClose
 }) => {
-  const { oldConfigText, newConfigText } = useMemo(() => {
-    // diff 出来有一些 object 属性顺序调整的差异，实际非改动，所以这里固定下排序
-    const deepSortKeys = (value: any): any => {
-      if (Array.isArray(value)) {
-        return value.map((item) => deepSortKeys(item));
-      }
-      if (value && typeof value === 'object') {
-        return Object.keys(value)
-          .sort((a, b) => a.localeCompare(b))
-          .reduce((acc: Record<string, any>, key) => {
-            acc[key] = deepSortKeys(value[key]);
-            return acc;
-          }, {});
-      }
-      return value;
-    };
-
-    const formatConfig = (config: any) => {
-      if (!config) {
-        return '';
-      }
-      const { configData, ...restConfig } = config ?? {};
-      let parsedConfigData = configData;
-      if (typeof configData === 'string') {
-        try {
-          parsedConfigData = JSON.parse(configData);
-        } catch (e) {
-          console.log('lxy parse diff configData error=== ', e);
-        }
-      }
-
-      const sortedConfig = deepSortKeys({
-        ...restConfig,
-        configData: parsedConfigData
-      });
-
-      return JSON.stringify(sortedConfig, null, 2);
-    };
-
-    return {
-      oldConfigText: formatConfig(oldConfig),
-      newConfigText: formatConfig(newConfig)
-    };
-  }, [oldConfig, newConfig]);
+  const { oldConfigText, newConfigText } = useMemo(
+    () => ({
+      oldConfigText: formatDiffConfig(oldConfig),
+      newConfigText: formatDiffConfig(newConfig)
+    }),
+    [oldConfig, newConfig]
+  );
 
   const copyConfig = async (text: string) => {
     try {

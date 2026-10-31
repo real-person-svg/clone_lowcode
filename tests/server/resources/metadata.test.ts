@@ -1,16 +1,20 @@
 import { vi } from 'vitest';
-import { ResourceService } from '../../../server/services/resources';
+import { ResourceService } from '../../../server/resource-placement/service';
 import { useResourceService } from './fixture';
 import { input } from './input';
 
 const fixture = useResourceService();
 
 it('更新、同状态切换、删除和恢复使用当前revision，日志保留准确的前后快照', () => {
-  const author = new ResourceService(fixture.service.repository, /* 固定创建时间，供审计字段保留断言使用。 */ () => '2026-01-01T00:00:00.000Z', 'author');
+  const author = new ResourceService(fixture.service.repository,
+    /* 固定创建时间，供审计字段保留断言使用。 */
+    () => '2026-01-01T00:00:00.000Z', 'author');
   const original = author.create(input());
   const creation = author.logs(original.id).list[0];
   let tick = 10;
-  const now = vi.fn(/* 让后续修改时间逐秒递增，便于检查更新元数据。 */ () => new Date(Date.UTC(2026, 0, 1, 0, 0, tick++)).toISOString());
+  const now = vi.fn(
+    /* 让后续修改时间逐秒递增，便于检查更新元数据。 */
+    () => new Date(Date.UTC(2026, 0, 1, 0, 0, tick++)).toISOString());
   const editor = new ResourceService(author.repository, now, 'editor');
 
   const updated = editor.update(original.id, { resourceName: '新版', revision: original.revision });
@@ -55,11 +59,15 @@ it('更新、同状态切换、删除和恢复使用当前revision，日志保�
 });
 
 it('首次发布的线上行从revision 1开始，源清理与目标日志共享一次取时', () => {
-  const author = new ResourceService(fixture.service.repository, /* 固定来源创建时间。 */ () => '2026-01-01T00:00:00.000Z', 'author');
+  const author = new ResourceService(fixture.service.repository,
+    /* 固定来源创建时间。 */
+    () => '2026-01-01T00:00:00.000Z', 'author');
   let source = author.create(input());
   source = author.update(source.id, { resourceName: '准备发布' });
   source = author.updateStatus(source.id, 1);
-  const now = vi.fn(/* 固定首次发布到线上的时间。 */ () => '2026-01-01T00:00:50.000Z');
+  const now = vi.fn(
+    /* 固定首次发布到线上的时间。 */
+    () => '2026-01-01T00:00:50.000Z');
   const publisher = new ResourceService(author.repository, now, 'publisher');
 
   const result = publisher.publish(source.id);
@@ -84,14 +92,20 @@ it('首次发布的线上行从revision 1开始，源清理与目标日志共享
 });
 
 it('覆盖发布按online递增revision并保留线上创建信息，源数据按独立revision清理', () => {
-  const onlineAuthor = new ResourceService(fixture.service.repository, /* 固定原线上记录的创建时间。 */ () => '2026-01-01T00:00:00.000Z', 'online-author');
+  const onlineAuthor = new ResourceService(fixture.service.repository,
+    /* 固定原线上记录的创建时间。 */
+    () => '2026-01-01T00:00:00.000Z', 'online-author');
   let online = onlineAuthor.create(input({ env: 'online', resourceName: '线上旧版' }));
   online = onlineAuthor.updateStatus(online.id, 1);
-  const sourceAuthor = new ResourceService(onlineAuthor.repository, /* 固定泳道来源的创建时间。 */ () => '2026-01-01T00:00:10.000Z', 'source-author');
+  const sourceAuthor = new ResourceService(onlineAuthor.repository,
+    /* 固定泳道来源的创建时间。 */
+    () => '2026-01-01T00:00:10.000Z', 'source-author');
   let source = sourceAuthor.create(input({ resourceName: '泳道新版' }));
   for (let i = 0; i < 4; i++) source = sourceAuthor.updateStatus(source.id, 1);
   let tick = 20;
-  const now = vi.fn(/* 逐次推进发布时间，验证更新和来源清理的元数据。 */ () => new Date(Date.UTC(2026, 0, 1, 0, 0, tick++)).toISOString());
+  const now = vi.fn(
+    /* 逐次推进发布时间，验证更新和来源清理的元数据。 */
+    () => new Date(Date.UTC(2026, 0, 1, 0, 0, tick++)).toISOString());
   const publisher = new ResourceService(sourceAuthor.repository, now, 'publisher');
 
   publisher.publish(source.id, false, false);
@@ -118,23 +132,45 @@ it('覆盖发布按online递增revision并保留线上创建信息，源数据�
 });
 
 it('校验失败与发布冲突不取时、不写入；相等时间允许发布', () => {
-  const author = new ResourceService(fixture.service.repository, /* 固定原作者创建资源的时间。 */ () => '2026-01-01T00:00:00.000Z', 'author');
+  const author = new ResourceService(fixture.service.repository,
+    /* 固定原作者创建资源的时间。 */
+    () => '2026-01-01T00:00:00.000Z', 'author');
   const source = author.create(input());
-  const onlineAuthor = new ResourceService(author.repository, /* 固定冲突目标的创建时间。 */ () => '2026-01-01T00:00:01.000Z', 'online-author');
+  const onlineAuthor = new ResourceService(author.repository,
+    /* 固定冲突目标的创建时间。 */
+    () => '2026-01-01T00:00:01.000Z', 'online-author');
   const online = onlineAuthor.create(input({ env: 'online' }));
-  const now = vi.fn(/* 固定失败操作的时间，检查失败不改变审计字段。 */ () => '2026-01-01T00:00:10.000Z');
+  const now = vi.fn(
+    /* 固定失败操作的时间，检查失败不改变审计字段。 */
+    () => '2026-01-01T00:00:10.000Z');
   const editor = new ResourceService(author.repository, now, 'editor');
   const sourceLogs = editor.logs(source.id);
   const onlineLogs = editor.logs(online.id);
 
-  expect(/* 使用陈旧修订号更新，验证失败不产生副作用。 */ () => editor.update(source.id, { revision: 999, resourceName: '' })).toThrow('已被修改');
-  expect(/* 清空示例图，验证校验失败不产生副作用。 */ () => editor.update(source.id, { exampleImage: '' })).toThrow('请上传');
-  expect(/* 修改不可变 Key，验证失败不写入。 */ () => editor.update(source.id, { resourceKey: 'different' })).toThrow('不可修改');
-  expect(/* 修改为已有线上身份，验证冲突不写入。 */ () => editor.update(source.id, { env: 'online' })).toThrow('相同');
-  expect(/* 更新不存在的资源，验证错误不改变已有记录。 */ () => editor.updateStatus(999, 0)).toThrow('不存在');
-  expect(/* 删除线上启用记录，验证拒绝操作不写日志。 */ () => editor.delete(online.id)).toThrow('不能删除');
-  expect(/* 恢复不存在的操作版本，验证失败不写入。 */ () => editor.roll(source.id, 999)).toThrow('没有可恢复');
-  expect(/* 对线上记录执行发布，验证不允许该操作。 */ () => editor.publish(online.id)).toThrow('不能发布');
+  expect(
+    /* 使用陈旧修订号更新，验证失败不产生副作用。 */
+    () => editor.update(source.id, { revision: 999, resourceName: '' })).toThrow('已被修改');
+  expect(
+    /* 清空示例图，验证校验失败不产生副作用。 */
+    () => editor.update(source.id, { exampleImage: '' })).toThrow('请上传');
+  expect(
+    /* 修改不可变 Key，验证失败不写入。 */
+    () => editor.update(source.id, { resourceKey: 'different' })).toThrow('不可修改');
+  expect(
+    /* 修改为已有线上身份，验证冲突不写入。 */
+    () => editor.update(source.id, { env: 'online' })).toThrow('相同');
+  expect(
+    /* 更新不存在的资源，验证错误不改变已有记录。 */
+    () => editor.updateStatus(999, 0)).toThrow('不存在');
+  expect(
+    /* 删除线上启用记录，验证拒绝操作不写日志。 */
+    () => editor.delete(online.id)).toThrow('不能删除');
+  expect(
+    /* 恢复不存在的操作版本，验证失败不写入。 */
+    () => editor.roll(source.id, 999)).toThrow('没有可恢复');
+  expect(
+    /* 对线上记录执行发布，验证不允许该操作。 */
+    () => editor.publish(online.id)).toThrow('不能发布');
   expect(editor.publish(source.id)).toMatchObject({ success: false, message: 'CONFLICT' });
   expect(now).not.toHaveBeenCalled();
   expect(editor.detail(source.id)).toEqual(source);
@@ -153,11 +189,15 @@ it('源清理日志失败会回滚目标覆盖、发布日志和源revision', ()
   const source = fixture.service.create(input({ resourceName: '发布候选' }));
   const onlineLogs = fixture.service.logs(online.id);
   const sourceLogs = fixture.service.logs(source.id);
-  const now = vi.fn(/* 固定发布者时钟，检查事务失败不遗留元数据。 */ () => '2026-01-01T00:01:00.000Z');
+  const now = vi.fn(
+    /* 固定发布者时钟，检查事务失败不遗留元数据。 */
+    () => '2026-01-01T00:01:00.000Z');
   const publisher = new ResourceService(fixture.service.repository, now, 'publisher');
   fixture.db.exec("CREATE TRIGGER reject_cleanup BEFORE INSERT ON resource_placement_operations WHEN NEW.operation_type='DELETE' BEGIN SELECT RAISE(ABORT,'cleanup_log_failure'); END");
 
-  expect(/* 触发被数据库拒绝的发布，验证整个事务回滚。 */ () => publisher.publish(source.id)).toThrow('cleanup_log_failure');
+  expect(
+    /* 触发被数据库拒绝的发布，验证整个事务回滚。 */
+    () => publisher.publish(source.id)).toThrow('cleanup_log_failure');
   expect(publisher.detail(online.id)).toEqual(online);
   expect(publisher.detail(source.id)).toEqual(source);
   expect(publisher.logs(online.id)).toEqual(onlineLogs);

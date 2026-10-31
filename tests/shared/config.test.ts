@@ -37,11 +37,15 @@ describe('共享配置契约', () => {
     { content: [{ type: 'Input', path: 'config.__proto__.value' }] },
     { content: [{ type: 'Input', key: 'config.constructor.prototype' }] },
     { content: [{ type: 'Input', children: [{ type: 'Input' }] }] }
-  ])('拒绝非法结构 %#', (value) => expect(/* 解析参数化非法配置，验证共享校验拒绝。 */ () => parseConfig(value)).toThrow());
+  ])('拒绝非法结构 %#', (value) => expect(
+    /* 解析参数化非法配置，验证共享校验拒绝。 */
+    () => parseConfig(value)).toThrow());
   it('空配置解析为content空数组，未知组件明确报错', () => {
     expect(parseConfig('')).toEqual({ content: [] });
-    expect(/* 解析未知控件类型，验证返回可读错误。 */ () => parseConfig({ content: [{ type: 'Missing' }] })).toThrow(
-      '未知组件'
-    );
+    expect(
+      /* 解析未知控件类型，验证返回可读错误。 */
+      () => parseConfig({ content: [{ type: 'Missing' }] })).toThrow(
+        '未知组件'
+      );
   });
 });

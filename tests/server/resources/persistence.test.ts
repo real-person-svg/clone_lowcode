@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { openDatabase } from '../../../server/db';
-import { ResourceRepository } from '../../../server/repositories/resources';
-import { ResourceService } from '../../../server/services/resources';
+import { ResourceRepository } from '../../../server/resource-placement/repository';
+import { ResourceService } from '../../../server/resource-placement/service';
 import { useResourceService } from './fixture';
 import { input } from './input';
 
@@ -12,11 +12,12 @@ it('只初始化结构，重复迁移不重置数据，重启可恢复配置', (
     'resource_placements',
     'resource_placement_operations',
     'assets'
-  ])
+  ]) {
     expect(
       (fixture.db.prepare(`SELECT count(*) AS n FROM ${table}`).get() as { n: number })
         .n
     ).toBe(0);
+  }
   const created = fixture.service.create(
     input({
       configData: JSON.stringify({
@@ -36,8 +37,10 @@ it('更新与日志在同一事务，日志失败保持原值和revision', () =>
   fixture.db.exec(
     "CREATE TRIGGER reject_update BEFORE INSERT ON resource_placement_operations WHEN NEW.operation_type='UPDATE' BEGIN SELECT RAISE(ABORT,'test_log_failure'); END"
   );
-  expect(/* 触发日志插入失败，验证资源更新也被事务撤销。 */ () =>
-    fixture.service.update(resource.id, { resourceName: '不应保存' })
+  expect(
+    /* 触发日志插入失败，验证资源更新也被事务撤销。 */
+    () =>
+      fixture.service.update(resource.id, { resourceName: '不应保存' })
   ).toThrow();
   expect(fixture.service.detail(resource.id)).toEqual(resource);
   expect(fixture.service.logs(resource.id).total).toBe(1);

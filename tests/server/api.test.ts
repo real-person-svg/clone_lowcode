@@ -7,15 +7,19 @@ import { createApp } from '../../server/app';
 let dir: string,
   db: ReturnType<typeof openDatabase>,
   app: ReturnType<typeof createApp>;
-beforeEach(/* 为每个接口用例创建临时数据库和 Express 应用。 */ () => {
-  dir = mkdtempSync(join(tmpdir(), 'resource-api-'));
-  db = openDatabase(join(dir, 'resources.sqlite'));
-  app = createApp(db, dir);
-});
-afterEach(/* 关闭用例数据库并清理临时数据目录。 */ () => {
-  db.close();
-  rmSync(dir, { recursive: true, force: true });
-});
+beforeEach(
+  /* 为每个接口用例创建临时数据库和 Express 应用。 */
+  () => {
+    dir = mkdtempSync(join(tmpdir(), 'resource-api-'));
+    db = openDatabase(join(dir, 'resources.sqlite'));
+    app = createApp(db, dir);
+  });
+afterEach(
+  /* 关闭用例数据库并清理临时数据目录。 */
+  () => {
+    db.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
 it('API对参数错误、不存在和重复提供明确契约，并阻止直接删除online启用记录', async () => {
   expect(
     (

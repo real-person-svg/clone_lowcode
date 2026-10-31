@@ -10,73 +10,61 @@ export function errorHandler(
   res: express.Response,
   _next: express.NextFunction
 ) {
-  if (error instanceof SyntaxError && 'body' in error) {
-    res
-      .status(400)
-      .json({
-        error: { code: 'INVALID_JSON', message: '请求内容必须是有效 JSON' }
-      });
+  const invalidJson = error instanceof SyntaxError && 'body' in error;
+  if (invalidJson) {
+    const responseError = { code: 'INVALID_JSON', message: '请求内容必须是有效 JSON' };
+    res.status(400).json({ error: responseError });
     return;
   }
+
   if (error instanceof ServiceError) {
-    res
-      .status(error.status)
-      .json({
-        error: {
-          code: error.code,
-          message: error.message,
-          details: error.details
-        }
-      });
+    const responseError = {
+      code: error.code,
+      message: error.message,
+      details: error.details
+    };
+    res.status(error.status).json({ error: responseError });
     return;
   }
+
   if (error instanceof z.ZodError) {
-    res
-      .status(400)
-      .json({
-        error: {
-          code: 'INVALID_PARAMETER',
-          message: error.issues
-            .map(/* 将字段路径与校验原因合并为可读错误信息。 */ (i) => `${i.path.join('.')}: ${i.message}`)
-            .join('；')
-        }
-      });
-    return;
-  }
-  if (error instanceof multer.MulterError) {
-    res
-      .status(400)
-      .json({
-        error: {
-          code: 'UPLOAD_FAILED',
-          message:
-            error.code === 'LIMIT_FILE_SIZE'
-              ? '文件不能超过 50MB'
-              : error.message
-        }
-      });
-    return;
-  }
-  if (
-    error &&
-    typeof error === 'object' &&
-    'code' in error &&
-    String(error.code).startsWith('SQLITE_CONSTRAINT_UNIQUE')
-  ) {
-    res
-      .status(409)
-      .json({
-        error: {
-          code: 'DUPLICATE',
-          message: '该业务线、环境下已存在相同的资源位 Key'
-        }
-      });
-    return;
-  }
-  console.error(error);
-  res
-    .status(500)
-    .json({
-      error: { code: 'SERVER_ERROR', message: '操作失败，请稍后重试' }
+    const messages = error.issues.map((issue) => {
+      const fieldPath = issue.path.join('.');
+
+      return `${fieldPath}: ${issue.message}`;
     });
+    const message = messages.join('；');
+    const responseError = { code: 'INVALID_PARAMETER', message };
+
+    res.status(400).json({ error: responseError });
+    return;
+  }
+
+  if (error instanceof multer.MulterError) {
+    const message = error.code === 'LIMIT_FILE_SIZE' ? '文件不能超过 50MB' : error.message;
+    const responseError = { code: 'UPLOAD_FAILED', message };
+
+    res.status(400).json({ error: responseError });
+    return;
+  }
+
+  let duplicateResource = false;
+  if (error && typeof error === 'object' && 'code' in error) {
+    const code = String(error.code);
+    duplicateResource = code.startsWith('SQLITE_CONSTRAINT_UNIQUE');
+  }
+
+  if (duplicateResource) {
+    const responseError = {
+      code: 'DUPLICATE',
+      message: '该业务线、环境下已存在相同的资源位 Key'
+    };
+    res.status(409).json({ error: responseError });
+    return;
+  }
+
+  console.error(error);
+
+  const responseError = { code: 'SERVER_ERROR', message: '操作失败，请稍后重试' };
+  res.status(500).json({ error: responseError });
 }

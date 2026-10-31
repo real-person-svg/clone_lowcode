@@ -15,6 +15,7 @@ interface InputTagPanelProps {
   disabled?: boolean;
 }
 
+/** 编辑标签列表，支持分隔输入、去重、单项删除和清空。 */
 const InputTagPanel = ({
   value = [],
   onChange,
@@ -25,16 +26,18 @@ const InputTagPanel = ({
   disabled,
 }: InputTagPanelProps) => {
   const [rawData, setRawData] = React.useState('');
-  const tags = value.map((tag, index) => ({
+  const tags = value.map(/* 为已有标签生成展示属性。 */ (tag, index) => ({
     color,
     children: tag,
     closable: true,
   }));
+  /** 保存尚未添加到列表的输入文本。 */
   const onHandleInput = React.useCallback((value: string) => {
     // TODO: 后续看看需不需要增加输入校验
     setRawData(value);
   }, []);
 
+  /** 拆分并合并待添加标签，提示重复项后清空输入。 */
   const onHandleAdd = React.useCallback(() => {
     const pendingString = rawData.trim();
     if (!pendingString) {
@@ -46,8 +49,9 @@ const InputTagPanel = ({
     }
     const addTags = pendingString
       .split(separatorRegExp ?? /(?!) /)
-      .filter((i) => Boolean(i))
-      ?.map((item) => item?.trim());
+      .filter(/* 过滤分隔产生的空项。 */ (i) => Boolean(i))
+      ?.map(/* 去除每项标签首尾空白。 */ (item) => item?.trim());
+    // 先保留已有顺序再合并新项，用 Set 去重；合并结果数量减少时提示存在重复项。
     const newTags = [...new Set([...value, ...addTags])];
     if (newTags.length !== value.length + addTags.length) {
       Toast.info(
@@ -62,19 +66,21 @@ const InputTagPanel = ({
     setRawData('');
   }, [rawData, separator, onChange, value]);
 
+  /** 按标签内容删除一项，禁用时不处理。 */
   const onHandleDelete = React.useCallback(
     (children: string) => {
       if (disabled) {
         return;
       }
       const newTags = [...tags];
-      const closeTagIndex = newTags.findIndex((t) => t.children === children);
+      const closeTagIndex = newTags.findIndex(/* 定位待删除标签的展示项。 */ (t) => t.children === children);
       newTags.splice(closeTagIndex, 1);
-      onChange(newTags.map(({ children }) => children));
+      onChange(newTags.map(/* 从展示项中提取剩余标签文本。 */ ({ children }) => children));
     },
     [tags, onChange, disabled],
   );
 
+  /** 清空全部标签。 */
   const onHandleClear = React.useCallback(() => {
     onChange([]);
   }, [onChange]);
@@ -101,7 +107,7 @@ const InputTagPanel = ({
       {tags.length ? (
         <div className={styles['result_panel']}>
           <div className={styles['tag_group']}>
-            {tags.map((itemProps: any) => (
+            {tags.map(/* 渲染每个标签及其删除入口。 */ (itemProps: any) => (
               <Tag
                 key={itemProps.children}
                 {...itemProps}

@@ -12,9 +12,11 @@ interface EditorHeaderProps {
   onSave: () => void;
 }
 
+/** 展示当前资源身份与业务线，提供返回、代码编辑和保存入口。 */
 export default function EditorHeader({ resource, saving, onOpenCode, onSave }: EditorHeaderProps) {
   const navigate = useNavigate();
-  const businessLabel = appList.find((item) => item.value === resource.bizId)?.label;
+  const businessLabel = appList.find(/* 匹配当前资源所属业务线。 */ (item) => item.value === resource.bizId)?.label;
+  /** 打开代码弹窗，并展示配置生成失败的原因。 */
   const openCode = () => {
     try {
       onOpenCode();
@@ -25,7 +27,7 @@ export default function EditorHeader({ resource, saving, onOpenCode, onSave }: E
 
   return (
     <header className={styles.header}>
-      <Button icon={<IconArrowLeft />} onClick={() => navigate('/lowcode')}>
+      <Button icon={<IconArrowLeft />} onClick={/* 返回资源位列表页面。 */ () => navigate('/lowcode')}>
         返回
       </Button>
       <div className={styles.headerTitle}>

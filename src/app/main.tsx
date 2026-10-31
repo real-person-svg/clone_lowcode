@@ -5,9 +5,10 @@ import { ConfigProvider, Spin } from '@douyinfe/semi-ui';
 import zh_CN from '@douyinfe/semi-ui/lib/es/locale/source/zh_CN';
 import './styles.scss';
 const List = lazy(
+  /** 按路由需要延迟加载资源位列表页面。 */
   () => import('@/features/resource-placement/list/ResourcePlacementList')
 );
-const Editor = lazy(() => import('@/features/resource-placement/editor'));
+const Editor = lazy(/* 按路由需要延迟加载低码编辑器页面。 */ () => import('@/features/resource-placement/editor'));
 createRoot(document.getElementById('root')!).render(
   <ConfigProvider locale={zh_CN}>
     <BrowserRouter>

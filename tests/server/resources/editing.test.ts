@@ -6,7 +6,7 @@ const fixture = useResourceService();
 it('默认启用，有效唯一性按业务线、Key、环境隔离，软删历史保留', () => {
   const first = fixture.service.create(input());
   expect(first.status).toBe(1);
-  expect(() => fixture.service.create(input())).toThrow('相同');
+  expect(/* 重复创建同身份资源，验证唯一性约束。 */ () => fixture.service.create(input())).toThrow('相同');
   expect(fixture.service.create(input({ bizId: 7356 })).id).not.toBe(first.id);
   expect(fixture.service.create(input({ env: 'online' })).id).not.toBe(first.id);
   fixture.service.delete(first.id);
@@ -40,10 +40,10 @@ it('组合筛选与分页total一致，LIKE通配字符按字面搜索', () => {
 
 it('online启用不能删，禁用后可以删除', () => {
   const online = fixture.service.create(input({ env: 'online' }));
-  expect(() => fixture.service.delete(online.id)).toThrow('不能删除');
+  expect(/* 删除线上启用记录，断言业务禁止该操作。 */ () => fixture.service.delete(online.id)).toThrow('不能删除');
   fixture.service.updateStatus(online.id, 0);
   fixture.service.delete(online.id);
-  expect(() => fixture.service.detail(online.id)).toThrow('不存在');
+  expect(/* 读取已软删除资源，断言默认详情不可见。 */ () => fixture.service.detail(online.id)).toThrow('不存在');
   expect(fixture.service.logs(online.id).total).toBe(3);
 });
 
@@ -65,13 +65,13 @@ it('更新保留配置与高级字段，检测陈旧revision并禁止身份漂�
   expect(updated.configData).toBe(resource.configData);
   expect(updated.showReco).toBe(1);
   expect(updated.extra).toBe(resource.extra);
-  expect(() =>
+  expect(/* 用旧修订号覆盖资源，断言并发冲突。 */ () =>
     fixture.service.update(resource.id, {
       resourceName: '覆盖',
       revision: resource.revision
     })
   ).toThrow('已被修改');
-  expect(() => fixture.service.update(resource.id, { resourceKey: 'new_key' })).toThrow(
+  expect(/* 修改不可变 Key，断言身份约束。 */ () => fixture.service.update(resource.id, { resourceKey: 'new_key' })).toThrow(
     '不可修改'
   );
 });
@@ -85,7 +85,7 @@ it('拒绝非法配置、JSON字段、版本限制和必填基础字段，失败
     { directoryPath: '' },
     { resourceKey: 'bad key' }
   ])
-    expect(() => fixture.service.create(input(fields))).toThrow();
+    expect(/* 创建含非法字段的资源，断言完整输入校验。 */ () => fixture.service.create(input(fields))).toThrow();
   expect(fixture.service.list({}).total).toBe(0);
   expect(
     (
@@ -101,7 +101,7 @@ it.each([null, '', '   '])(
   (exampleImage) => {
     const resource = fixture.service.create(input());
     const logs = fixture.service.logs(resource.id);
-    expect(() => fixture.service.update(resource.id, { exampleImage })).toThrow(
+    expect(/* 清空已有示例图，断言失败且不产生额外写入。 */ () => fixture.service.update(resource.id, { exampleImage })).toThrow(
       '请上传资源位示例图'
     );
     expect(fixture.service.detail(resource.id)).toEqual(resource);

@@ -33,13 +33,16 @@ const columns = {
 const projection =
   'id,' +
   Object.entries(columns)
-    .map(([key, col]) => `${col} AS ${key}`)
+    .map(/* 为数据库列生成业务字段别名。 */ ([key, col]) => `${col} AS ${key}`)
     .join(',');
 export class ResourceRepository {
+  /** 保存数据库连接，供资源位及日志读写使用。 */
   constructor(public db: SqliteDatabase) {}
+  /** 为查询结果补充数据来源，并保留未找到的情况。 */
   private map(row: unknown): ResourcePlacement | undefined {
     return row ? { ...(row as ResourcePlacement), from: '数据库' } : undefined;
   }
+  /** 按 ID 查询资源位，包含软删除记录。 */
   find(id: number) {
     return this.map(
       this.db
@@ -47,6 +50,7 @@ export class ResourceRepository {
         .get(id)
     );
   }
+  /** 按业务线、Key 和环境查找未删除的资源位。 */
   identity(bizId: number, key: string, env: string) {
     return this.map(
       this.db
@@ -56,6 +60,7 @@ export class ResourceRepository {
         .get(bizId, key, env)
     );
   }
+  /** 查找指定业务线和 Key 下未删除的非子版本资源位。 */
   parent(bizId: number, key: string) {
     return this.map(
       this.db
@@ -65,30 +70,33 @@ export class ResourceRepository {
         .get(bizId, key)
     );
   }
+  /** 插入完整资源位并返回数据库保存后的记录。 */
   insert(resource: Omit<ResourcePlacement, 'id' | 'from'>) {
     const keys = Object.keys(columns) as (keyof typeof columns)[];
     const id = Number(
       this.db
         .prepare(
           `INSERT INTO resource_placements (${keys
-            .map((k) => columns[k])
-            .join(',')}) VALUES (${keys.map(() => '?').join(',')})`
+            .map(/* 按字段映射生成插入列名。 */ (k) => columns[k])
+            .join(',')}) VALUES (${keys.map(/* 为每个插入字段生成参数占位符。 */ () => '?').join(',')})`
         )
-        .run(...keys.map((k) => resource[k])).lastInsertRowid
+        .run(...keys.map(/* 按列顺序提取插入参数。 */ (k) => resource[k])).lastInsertRowid
     );
     return this.find(id)!;
   }
+  /** 保存资源位全部持久化字段并返回最新记录。 */
   save(resource: ResourcePlacement) {
     const keys = Object.keys(columns) as (keyof typeof columns)[];
     this.db
       .prepare(
         `UPDATE resource_placements SET ${keys
-          .map((k) => `${columns[k]}=?`)
+          .map(/* 为各字段生成参数化更新表达式。 */ (k) => `${columns[k]}=?`)
           .join(',')} WHERE id=?`
       )
-      .run(...keys.map((k) => resource[k]), resource.id);
+      .run(...keys.map(/* 按更新列顺序提取字段值。 */ (k) => resource[k]), resource.id);
     return this.find(resource.id)!;
   }
+  /** 组合筛选条件，分页查询未删除资源位及总数。 */
   list(filters: ListFilters): PageResult<ResourcePlacement> {
     const where = ['status!=2'];
     const values: (string | number)[] = [];
@@ -100,13 +108,15 @@ export class ResourceRepository {
     ] as const) {
       if (filters[field]) {
         where.push(`${col} LIKE ? ESCAPE '\\'`);
+        // 转义 LIKE 通配符，让用户输入的 %、_ 和反斜线按字面值参与模糊匹配。
         values.push('%' + filters[field]!.replace(/[\\%_]/g, '\\$&') + '%');
       }
     }
     if (filters.bizId?.length) {
-      where.push(`biz_id IN (${filters.bizId.map(() => '?').join(',')})`);
+      where.push(`biz_id IN (${filters.bizId.map(/* 为业务线筛选生成参数占位符。 */ () => '?').join(',')})`);
       values.push(...filters.bizId);
     }
+    // 计数与列表复用筛选条件及参数，保证分页总数和当前页记录口径一致。
     const clause = where.join(' AND '),
       page = filters.page || 1,
       pageSize = filters.pageSize || 10;
@@ -122,9 +132,10 @@ export class ResourceRepository {
         `SELECT ${projection} FROM resource_placements WHERE ${clause} ORDER BY updated_at DESC,id DESC LIMIT ? OFFSET ?`
       )
       .all(...values, pageSize, (page - 1) * pageSize)
-      .map((r) => this.map(r)!);
+      .map(/* 将查询行转换为带来源的资源位记录。 */ (r) => this.map(r)!);
     return { list, total, page, pageSize };
   }
+  /** 写入操作前后快照及操作者信息。 */
   log(
     type: string,
     old: ResourcePlacement | undefined,
@@ -146,6 +157,7 @@ export class ResourceRepository {
         time
       );
   }
+  /** 分页读取资源位的操作历史，按版本倒序排列。 */
   logs(id: number, page = 1, pageSize = 10): PageResult<OperationLog> {
     const total = (
       this.db
@@ -161,6 +173,7 @@ export class ResourceRepository {
       .all(id, pageSize, (page - 1) * pageSize) as OperationLog[];
     return { list, total, page, pageSize };
   }
+  /** 按资源位和操作版本读取操作后快照，供回滚校验使用。 */
   operation(id: number, versionId: number) {
     return this.db
       .prepare(

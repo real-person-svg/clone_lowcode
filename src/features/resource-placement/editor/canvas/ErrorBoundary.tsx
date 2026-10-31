@@ -17,10 +17,12 @@ class ErrorBoundary extends Component<Props, State> {
     hasError: false,
   };
 
+  /** 将子控件渲染异常保存为边界的错误状态。 */
   static getDerivedStateFromError(e: Error): State {
     return { hasError: true, errorInfo: e };
   }
 
+  /** 记录控件渲染异常和 React 组件栈，便于排查。 */
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', {
       error,
@@ -33,6 +35,7 @@ class ErrorBoundary extends Component<Props, State> {
     });
   }
 
+  /** 正常时渲染子控件，异常时展示错误提示。 */
   render() {
     const { hasError, errorInfo } = this.state;
     if (hasError) {

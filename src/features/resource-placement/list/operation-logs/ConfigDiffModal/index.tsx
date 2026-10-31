@@ -19,12 +19,14 @@ interface Props {
   onClose: () => void;
 }
 
+/** 并排展示操作前后配置差异，提供两侧配置复制。 */
 const ConfigDiffModal: React.FC<Props> = ({
   visible,
   oldConfig,
   newConfig,
   onClose
 }) => {
+  /** 将前后快照分别格式化为稳定的差异文本。 */
   const { oldConfigText, newConfigText } = useMemo(
     () => ({
       oldConfigText: formatDiffConfig(oldConfig),
@@ -33,6 +35,7 @@ const ConfigDiffModal: React.FC<Props> = ({
     [oldConfig, newConfig]
   );
 
+  /** 将差异文本压缩为 JSON 后写入剪贴板，并反馈结果。 */
   const copyConfig = async (text: string) => {
     try {
       await navigator.clipboard.writeText(
@@ -90,7 +93,7 @@ const ConfigDiffModal: React.FC<Props> = ({
                   <span>变更前</span>
                   <Typography.Text
                     link
-                    onClick={() => void copyConfig(oldConfigText)}
+                    onClick={/* 复制变更前的配置。 */ () => void copyConfig(oldConfigText)}
                   >
                     复制
                   </Typography.Text>
@@ -101,7 +104,7 @@ const ConfigDiffModal: React.FC<Props> = ({
                   <span>变更后</span>
                   <Typography.Text
                     link
-                    onClick={() => void copyConfig(newConfigText)}
+                    onClick={/* 复制变更后的配置。 */ () => void copyConfig(newConfigText)}
                   >
                     复制
                   </Typography.Text>

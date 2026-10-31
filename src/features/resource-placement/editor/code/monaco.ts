@@ -8,6 +8,7 @@ import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
     MonacoEnvironment?: { getWorker(moduleId: string, label: string): Worker };
   }
 ).MonacoEnvironment = {
+  /** 按语言选择 JSON 专用或通用编辑器 Worker。 */
   getWorker(_moduleId: string, label: string) {
     return label === 'json' ? new JsonWorker() : new EditorWorker();
   },

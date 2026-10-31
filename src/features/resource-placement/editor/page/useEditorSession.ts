@@ -7,26 +7,29 @@ import { transformConfigToEditorData, transformEditorDataToConfig } from '../con
 import { validateAllComponents } from '../configuration/utils';
 import { useCodeModalSnapshot } from '../code/useCodeModalSnapshot';
 
+/** 将未知异常转换为可展示的文本。 */
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
 
+/** 协调资源加载、配置保存、JSON 导入和代码弹窗会话。 */
 export function useEditorSession() {
   const state = useEditorState();
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [saving, setSaving] = useState(false);
-  const code = useCodeModalSnapshot(() => JSON.stringify(transformEditorDataToConfig(state.editorConfig)));
+  const code = useCodeModalSnapshot(/* 按需将当前编辑器树序列化为代码弹窗快照。 */ () => JSON.stringify(transformEditorDataToConfig(state.editorConfig)));
   const { getResourceDetail } = state;
 
-  useEffect(() => {
+  useEffect(/* 加载当前路由资源，并在清理后忽略本轮加载状态回写。 */ () => {
     let active = true;
     setLoading(true);
     setLoadError('');
     getResourceDetail()
-      .catch((error) => { if (active) setLoadError(errorMessage(error)); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+      .catch(/* 仅在本轮加载仍有效时展示错误。 */ (error) => { if (active) setLoadError(errorMessage(error)); })
+      .finally(/* 仅在本轮加载仍有效时结束加载状态。 */ () => { if (active) setLoading(false); });
+    return /* 使本轮加载的后续状态回写失效。 */ () => { active = false; };
   }, [getResourceDetail]);
 
+  /** 校验必填项后携带修订号保存配置，并更新保存状态。 */
   const save = async () => {
     const resource = state.curResourceDetail;
     if (!resource?.id) return;
@@ -44,7 +47,7 @@ export function useEditorSession() {
         revision: resource.revision,
         configData: JSON.stringify(config),
       });
-      state.setCurResourceDetail((current) => current?.id === detail.id ? detail : current);
+      state.setCurResourceDetail(/* 仅当当前详情仍是同一资源时替换服务端返回的数据。 */ (current) => current?.id === detail.id ? detail : current);
       state.resetChanges();
       Toast.success('保存成功');
     } catch (error) {
@@ -54,6 +57,7 @@ export function useEditorSession() {
     }
   };
 
+  /** 校验并导入 JSON 配置，成功后关闭代码弹窗。 */
   const importJson = (value: string) => {
     try {
       parseConfig(value);

@@ -9,7 +9,7 @@ const jsonString = z.string().nullable().optional();
 const editableSchema = z.object({
   resourceKey: text.regex(/^[A-Za-z0-9_-]+$/, '资源位 Key 仅支持字母、数字、下划线和横线'),
   resourceName: text,
-  bizId: z.number().int().refine((v) => appList.some((a) => a.value === v), '无效业务线'),
+  bizId: z.number().int().refine(/* 确认业务线编号存在于支持列表中。 */ (v) => appList.some(/* 匹配当前待校验的业务线编号。 */ (a) => a.value === v), '无效业务线'),
   env: text.regex(/^\S+$/, '环境不能包含空格'),
   description: z.string().optional(),
   exampleImage: z.string().nullable().optional(),
@@ -27,10 +27,12 @@ const editableSchema = z.object({
   revision: z.number().int().positive().optional()
 });
 
+/** 校验资源位字段、低码配置和附加 JSON，并返回规范化输入。 */
 export function validateResource(data: ResourceInput) {
   const parsed = editableSchema.parse(data);
   if (!parsed.exampleImage?.trim()) throw new ServiceError('INVALID_RESOURCE', '请上传资源位示例图');
 
+  // 先用共享契约解析并重新序列化配置，空文本归一为空配置，结构错误转换为业务错误。
   try {
     parsed.configData = JSON.stringify(parseConfig(parsed.configData ?? ''));
   } catch (e) {

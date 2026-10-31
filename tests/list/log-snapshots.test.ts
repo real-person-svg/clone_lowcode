@@ -4,7 +4,7 @@ import {
   parseLogSnapshot
 } from '../../src/features/resource-placement/list/operation-logs/snapshots';
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(/* 每个用例后恢复日志 spy，避免污染后续断言。 */ () => vi.restoreAllMocks());
 
 it('日志仅过滤六个顶层审计字段，保留业务字段、嵌套同名字段和原始输入', () => {
   const text = '{"creator":"a","updater":"b","createdAt":"c","updatedAt":"d","revision":8,"from":"数据库","id":3,"status":0,"extra":{"creator":"nested","revision":2}}';
@@ -15,7 +15,7 @@ it('日志仅过滤六个顶层审计字段，保留业务字段、嵌套同名�
   });
   expect(JSON.parse(text)).toHaveProperty('creator', 'a');
   expect(parseLogSnapshot('')).toBeUndefined();
-  expect(() => parseLogSnapshot('{')).toThrow(SyntaxError);
+  expect(/* 解析损坏快照，以断言解析错误没有被隐藏。 */ () => parseLogSnapshot('{')).toThrow(SyntaxError);
 });
 
 it('Diff解析配置JSON，递归排列对象键但保持数组顺序和标量值', () => {
@@ -43,7 +43,7 @@ it('Diff解析配置JSON，递归排列对象键但保持数组顺序和标量�
 });
 
 it('无效嵌套JSON保持原文，缺失侧和两侧空态的文本仍为空', () => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  const log = vi.spyOn(console, 'log').mockImplementation(/* 屏蔽预期的历史配置解析日志，并通过 spy 验证记录。 */ () => undefined);
   expect(formatDiffConfig({ configData: '{broken' })).toBe(`{
   "configData": "{broken"
 }`);
@@ -68,9 +68,9 @@ it('格式转换不改变传入对象和数组', () => {
   const rows = Object.freeze([Object.freeze({ z: 2, a: 1 }), Object.freeze({ z: 1, a: 2 })]);
   const configData = Object.freeze({ z: 0, a: rows });
   const snapshot = Object.freeze({ resourceName: '测试', configData });
-  expect(() => formatDiffConfig(snapshot)).not.toThrow();
+  expect(/* 格式化冻结快照，验证不会尝试原地修改。 */ () => formatDiffConfig(snapshot)).not.toThrow();
   expect(snapshot.configData).toBe(configData);
   expect(configData.a).toBe(rows);
   expect(Object.keys(rows[0])).toEqual(['z', 'a']);
-  expect(rows.map((row) => row.z)).toEqual([2, 1]);
+  expect(rows.map(/* 提取数组中业务字段，确认排序没有改变数组顺序。 */ (row) => row.z)).toEqual([2, 1]);
 });

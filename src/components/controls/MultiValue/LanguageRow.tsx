@@ -21,6 +21,7 @@ interface LanguageRowProps {
   onRemove: () => void;
 }
 
+/** 展示一条语言或地区配置，编辑选择项及对应内容。 */
 export default function LanguageRow({
   item,
   index,
@@ -45,14 +46,14 @@ export default function LanguageRow({
             filter
             value={item.UserConfigTypeValue}
             optionList={optionList}
-            onChange={(value) =>
+            onChange={/* 更新当前行的语言或地区编码。 */ (value) =>
               onChange({ ...item, UserConfigTypeValue: String(value) })
             }
           />
         </Col>
         <Col span={upload ? 12 : 14}>
           <div style={{ marginLeft: 7 }}>
-            {renderInput(item.Value, (Value) => onChange({ ...item, Value }))}
+            {renderInput(item.Value, /* 更新当前行的链接或配图内容。 */ (Value) => onChange({ ...item, Value }))}
           </div>
         </Col>
         <Col span={4}>

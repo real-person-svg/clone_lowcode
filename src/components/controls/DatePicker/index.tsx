@@ -8,14 +8,16 @@ export interface Props extends Omit<DatePickerProps, 'onChange'> {
   onChange: (v: number) => void;
 }
 
+/** 包装日期选择控件，统一向表单输出时间戳或时间戳数组。 */
 const ControlDatePicker = (props: Props) => {
+  /** 将清空、单日期和日期范围转换为对应的表单值。 */
   const onChange = React.useCallback(
     (v: any) => {
       let temp = v;
       if (!v) {
         temp = undefined;
       } else if (Array.isArray(v)) {
-        temp = v.map((i) => {
+        temp = v.map(/* 将范围中的单个日期转换为毫秒时间戳。 */ (i) => {
           const temp = new Date(i);
           return temp.getTime();
         });

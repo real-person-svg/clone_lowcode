@@ -21,6 +21,7 @@ export interface LocalUploadProps {
   supportRatio?: string[];
 }
 const emptyFiles: string[] = [];
+/** 按配置校验图片像素尺寸与宽高比，并释放临时对象地址。 */
 export async function validateImage(
   file: File,
   supportSize: string[] = [],
@@ -30,9 +31,9 @@ export async function validateImage(
   const url = URL.createObjectURL(file);
   try {
     const image = new Image();
-    await new Promise<void>((resolve, reject) => {
-      image.onload = () => resolve();
-      image.onerror = () => reject(new Error('图片加载失败'));
+    await new Promise<void>(/* 等待图片加载完成后才能读取尺寸。 */ (resolve, reject) => {
+      image.onload = /* 图片加载成功时允许继续校验。 */ () => resolve();
+      image.onerror = /* 图片加载失败时中止上传校验。 */ () => reject(new Error('图片加载失败'));
       image.src = url;
     });
     if (
@@ -44,7 +45,7 @@ export async function validateImage(
       );
     if (
       supportRatio.length &&
-      !supportRatio.some((ratio) => {
+      !supportRatio.some(/* 允许宽高比误差小于 0.01，避免比例计算的微小偏差。 */ (ratio) => {
         const [w, h] = ratio.split(':').map(Number);
         return (
           w > 0 && h > 0 && Math.abs(image.width / image.height - w / h) < 0.01
@@ -58,6 +59,7 @@ export async function validateImage(
     URL.revokeObjectURL(url);
   }
 }
+/** 包装本地资源上传，维护文件列表并向表单输出成功文件地址。 */
 export default function ControlUpload({
   type = 'image',
   value = emptyFiles,
@@ -71,14 +73,14 @@ export default function ControlUpload({
   supportRatio,
 }: LocalUploadProps) {
   const [files, setFiles] = React.useState<FileItem[]>([]);
-  React.useEffect(() => {
-    setFiles((previous) => {
+  React.useEffect(/* 将外部地址列表同步为上传控件的文件状态。 */ () => {
+    setFiles(/* 地址未变化时保留原列表，避免丢失正在上传的状态。 */ (previous) => {
       const urls = previous
-        .filter((file) => file.status === 'success')
-        .map((file) => file.url);
+        .filter(/* 筛选已上传成功的文件。 */ (file) => file.status === 'success')
+        .map(/* 提取成功文件地址用于比较。 */ (file) => file.url);
       return JSON.stringify(urls) === JSON.stringify(value)
         ? previous
-        : value.map((url) => ({
+        : value.map(/* 将外部地址转换为可展示的成功文件项。 */ (url) => ({
             uid: url,
             name: url.split('/').pop() || url,
             url,
@@ -88,6 +90,7 @@ export default function ControlUpload({
           }));
     });
   }, [value, type]);
+  /** 校验大小和图片约束后上传资源，并回报上传结果。 */
   const customRequest = async ({
     fileInstance,
     onSuccess,
@@ -117,18 +120,18 @@ export default function ControlUpload({
       limit={limit}
       disabled={disabled}
       fileList={files}
-      onPreviewClick={(file) => {
+      onPreviewClick={/* 在新窗口中预览已有文件地址。 */ (file) => {
         if (file.url) window.open(file.url, '_blank', 'noopener');
       }}
-      onChange={({ fileList }) => {
-        const next = fileList.map((file) => ({
+      onChange={/* 同步上传响应地址，并仅将成功文件列表发布给表单。 */ ({ fileList }) => {
+        const next = fileList.map(/* 用服务器返回的地址补全文件项。 */ (file) => ({
           ...file,
           url: file.response?.url ?? file.url,
         }));
         setFiles(next);
         const urls = next
-          .filter((file) => file.status === 'success' && file.url)
-          .map((file) => file.url!);
+          .filter(/* 筛选上传成功且存在地址的文件。 */ (file) => file.status === 'success' && file.url)
+          .map(/* 提取需要写入表单的资源地址。 */ (file) => file.url!);
         if (JSON.stringify(urls) !== JSON.stringify(value)) onChange?.(urls);
       }}
     >

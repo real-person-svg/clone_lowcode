@@ -15,10 +15,10 @@ it('回滚恢复选中操作后的快照并追加历史，删除操作无快照�
   expect(fixture.service.logs(resource.id).total).toBe(4);
   fixture.service.delete(resource.id);
   const deleted = fixture.service.logs(resource.id).list[0];
-  expect(() => fixture.service.roll(resource.id, deleted.versionId)).toThrow(
+  expect(/* 选择没有操作后快照的删除日志，断言不能回滚。 */ () => fixture.service.roll(resource.id, deleted.versionId)).toThrow(
     '没有可恢复'
   );
-  expect(() => fixture.service.roll(resource.id, 99999)).toThrow('没有可恢复');
+  expect(/* 回滚不存在的版本，断言拒绝操作。 */ () => fixture.service.roll(resource.id, 99999)).toThrow('没有可恢复');
 });
 
 it('回滚唯一性失败不会改变资源或历史', () => {
@@ -28,7 +28,7 @@ it('回滚唯一性失败不会改变资源或历史', () => {
   fixture.service.create(input());
   const before = fixture.service.detail(resource.id),
     logs = fixture.service.logs(resource.id).total;
-  expect(() => fixture.service.roll(resource.id, selected.versionId)).toThrow('相同');
+  expect(/* 恢复会与现有身份冲突的历史快照，断言唯一性约束。 */ () => fixture.service.roll(resource.id, selected.versionId)).toThrow('相同');
   expect(fixture.service.detail(resource.id)).toEqual(before);
   expect(fixture.service.logs(resource.id).total).toBe(logs);
 });

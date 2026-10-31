@@ -7,6 +7,7 @@ export interface Props {
   style?: CSSProperties;
 }
 
+/** 按列布局展示子控件，并透传容器样式。 */
 const ColumnContainer = ({ children, style }: Props) => (
   <div className={styles.column_container_wrapper} style={style}>
     {children}

@@ -5,6 +5,7 @@ import { generateComponentId, getIsDeepComponent } from './utils';
 import { canContainChildren } from './componentCapabilities';
 import { parseConfig, validateConfig } from '@shared/config';
 
+/** 将编辑器节点及子树转换为可持久化配置，组装字段路径和原生属性。 */
 function transformComponent(component: ComponentInstance, parentPath?: string) {
   const { properties } = component;
 
@@ -39,7 +40,7 @@ function transformComponent(component: ComponentInstance, parentPath?: string) {
 
   if (component.children && component.children.length > 0) {
     // 普通布局不增加字段层级；数组子项从每一行读取相对路径。
-    config.children = component.children.map((child) =>
+    config.children = component.children.map(/* 递归转换子节点，数组容器的子项从相对路径开始。 */ (child) =>
       transformComponent(
         child,
         getIsDeepComponent(component) ? '' : parentPath,
@@ -50,6 +51,7 @@ function transformComponent(component: ComponentInstance, parentPath?: string) {
   return config;
 }
 
+/** 将编辑器树导出为配置，并校验最终结构。 */
 export function transformEditorDataToConfig(components: ComponentInstance[]) {
   try {
     // 兼容根数组直接占用 config 的旧格式，避免生成 config.config。
@@ -57,7 +59,7 @@ export function transformEditorDataToConfig(components: ComponentInstance[]) {
       components.length === 1 &&
       getIsDeepComponent(components[0]) &&
       components[0].properties?.path === 'config';
-    const content = components.map((component) =>
+    const content = components.map(/* 按根数组兼容规则为每个根节点选择字段前缀。 */ (component) =>
       transformComponent(component, isSingleArrayConfig ? '' : 'config'),
     );
     const result = { content };
@@ -70,6 +72,7 @@ export function transformEditorDataToConfig(components: ComponentInstance[]) {
   }
 }
 
+/** 将配置节点转为编辑器实例，兼容旧字段别名并重建父子身份。 */
 function transformConfigItemToComponent(
   configItem: any,
   parentId?: string,
@@ -101,7 +104,7 @@ function transformConfigItemToComponent(
 
   // 先生成父节点 ID，再创建子节点，保证 parent 始终指向本次导入的父节点。
   if (canContainChildren(configItem.type)) {
-    component.children = (configItem.children || []).map((child: any) =>
+    component.children = (configItem.children || []).map(/* 使用本次生成的父节点 ID 递归导入子项。 */ (child: any) =>
       transformConfigItemToComponent(child, component.id),
     );
   }
@@ -109,6 +112,7 @@ function transformConfigItemToComponent(
   return component;
 }
 
+/** 解析持久化配置并重建编辑器组件树。 */
 export function transformConfigToEditorData(
   configData: string,
 ): ComponentInstance[] {
@@ -119,7 +123,7 @@ export function transformConfigToEditorData(
 
     const parsedConfig = parseConfig(configData);
 
-    const components = parsedConfig.content.map((item: any) =>
+    const components = parsedConfig.content.map(/* 将每个根配置项转为编辑器节点。 */ (item: any) =>
       transformConfigItemToComponent(item),
     );
 

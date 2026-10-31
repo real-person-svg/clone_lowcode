@@ -14,7 +14,8 @@ import { useRenderMetric } from '../runtime/performance';
 import styles from './style.module.scss';
 import { useControlProps } from './useControlProps';
 
-// Selection and drag state belong to the shell; this subtree only receives content inputs.
+// 选中和拖动状态留在外壳，内容子树只接收实际控件输入，减少无关更新。
+/** 渲染配置驱动的控件内容和子树，将选择与拖拽状态留在外壳。 */
 const ComponentContent: React.FC<Omit<ComponentRendererProps, 'index'>> = ({
   component,
   fieldPrefix,
@@ -62,8 +63,7 @@ const ComponentContent: React.FC<Omit<ComponentRendererProps, 'index'>> = ({
     ...parsedProps,
   };
 
-  // Preserve the source spread precedence: explicit cProps rules override node rules.
-  // Semi retains its own custom-validate precedence over schema rules.
+  // cProps 显式提供的 rules（含 null）覆盖节点规则；自定义 validate 的优先级仍由 Semi 决定。
   const configuredRules = Object.hasOwn(parsedProps, 'rules')
     ? parsedProps.rules
     : properties.rules;
@@ -91,7 +91,7 @@ const ComponentContent: React.FC<Omit<ComponentRendererProps, 'index'>> = ({
         {...runtimeProps}
         {...injectedProps}
       >
-        {(component.children || []).map((child, childIndex) => (
+        {(component.children || []).map(/* 渲染容器子组件，数组容器使用当前字段作为子项前缀。 */ (child, childIndex) => (
           <ComponentRenderer
             key={child.id}
             component={child}

@@ -7,6 +7,7 @@ const yesNo = [
   { label: '是', value: 1 }
 ];
 
+/** 展示频控、推荐和 AB 实验等资源位业务选项。 */
 export default function BusinessOptionsFields() {
   return (
     <>

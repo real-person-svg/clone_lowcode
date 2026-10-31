@@ -3,6 +3,7 @@ import multer from 'multer';
 import { z } from 'zod';
 import { ServiceError } from '../errors';
 
+/** 将解析、业务、校验和存储异常转换为统一 HTTP 错误响应。 */
 export function errorHandler(
   error: unknown,
   _req: express.Request,
@@ -36,7 +37,7 @@ export function errorHandler(
         error: {
           code: 'INVALID_PARAMETER',
           message: error.issues
-            .map((i) => `${i.path.join('.')}: ${i.message}`)
+            .map(/* 将字段路径与校验原因合并为可读错误信息。 */ (i) => `${i.path.join('.')}: ${i.message}`)
             .join('；')
         }
       });

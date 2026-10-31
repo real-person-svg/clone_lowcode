@@ -8,6 +8,7 @@ export interface HeaderProps {
   operateNode?: ReactNode;
   className?: string;
 }
+/** 展示页面标题及可选操作按钮或自定义操作区。 */
 export default function Header({
   title,
   operateLabel,

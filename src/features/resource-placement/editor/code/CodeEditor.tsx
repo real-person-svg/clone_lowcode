@@ -21,6 +21,7 @@ interface CodeEditorProps {
   };
 }
 
+/** 提供弹窗和表单两种 JSON 编辑入口，并管理各自的文档值。 */
 const CodeEditor: React.FC<CodeEditorProps> = ({
   initCodeValue,
   documentKey,
@@ -34,7 +35,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const [codeValue, setCodeValue] = useState('');
   const field = useJsonDocument(documentKey, restProps?.value ?? '');
 
-  useEffect(() => {
+  useEffect(/* 打开弹窗时将初始配置格式化为本轮编辑内容。 */ () => {
     if (modelConfig?.visible) {
       setCodeValue(formatJsonDocument(initCodeValue ?? ''));
     }
@@ -45,12 +46,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       height={restProps?.height ?? (modelConfig ? 'min(600px, 65vh)' : '300px')}
       language="json"
       value={modelConfig ? codeValue : field.value}
-      onChange={(value) => {
+      onChange={/* 将 Monaco 输入同步至弹窗状态或字段文档。 */ (value) => {
         const next = value ?? '';
         if (modelConfig) setCodeValue(next);
-        else field.change(next, (input) => restProps?.onChange?.(input));
+        else field.change(next, /* 将字段文档变化通知外部表单。 */ (input) => restProps?.onChange?.(input));
       }}
-      onMount={(editor) => {
+      onMount={/* 记录 Monaco 挂载，并为字段模式关联文档实例。 */ (editor) => {
         recordLifecycleMetric('monacoMounts');
         if (!modelConfig) field.mount(editor);
       }}
@@ -76,7 +77,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     <Modal
       title={title}
       visible={modelConfig.visible}
-      onOk={() => onOk?.(codeValue)}
+      onOk={/* 确认弹窗时提交当前编辑文本。 */ () => onOk?.(codeValue)}
       onCancel={onCancel}
       width={800}
       okText="确定"
@@ -93,6 +94,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 export default CodeEditor;
 
 export const FormCodeEditor = withField(
+  /** 将代码编辑器接入表单，按组件身份区分独立文档。 */
   ({ componentId, documentValue, ...restProps }: Record<string, any>) => (
     <CodeEditor
       documentKey={componentId}

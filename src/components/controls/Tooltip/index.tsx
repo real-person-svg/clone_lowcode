@@ -19,6 +19,7 @@ const horizontalStyle = {
   height: '80px',
 };
 
+/** 展示单张提示图片，或以轮播展示多张提示图片。 */
 const CarouselTip = ({
   imgList = [],
   isHorizontal = false,
@@ -29,7 +30,7 @@ const CarouselTip = ({
       style={isHorizontal ? horizontalStyle : {}}
     >
       <Carousel className={styles['controls_carousel_tips']} theme="light">
-        {imgList.map((src, index) => (
+        {imgList.map(/* 为轮播中的每张提示图片生成节点。 */ (src, index) => (
           <img src={src} className={styles['img_item']} key={src} />
         ))}
       </Carousel>
@@ -42,6 +43,7 @@ const CarouselTip = ({
     />
   );
 
+/** 为子元素提供文本或图片提示内容。 */
 const ControlTooltip = ({ tips, isHorizontal, children }: Props) => (
   <Tooltip
     content={

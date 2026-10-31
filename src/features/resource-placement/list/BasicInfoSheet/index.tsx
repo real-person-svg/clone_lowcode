@@ -22,6 +22,7 @@ const titles: Record<SheetMode, string> = {
   child: '创建子版本'
 };
 
+/** 提供新建、编辑、复制和子版本共用的基础信息侧栏。 */
 export default function BasicInfoSheet({
   mode,
   record,
@@ -37,6 +38,7 @@ export default function BasicInfoSheet({
   const [saving, setSaving] = useState(false);
   const isEdit = mode === 'edit';
   const initial = initialValues(mode, record);
+  /** 按当前模式提交资源位数据，编辑时携带修订号检测冲突。 */
   const submit = async (values: Values) => {
     setSaving(true);
     try {
@@ -73,7 +75,7 @@ export default function BasicInfoSheet({
           <Button
             theme="solid"
             loading={saving}
-            onClick={() => form.current?.submitForm()}
+            onClick={/* 触发表单校验及提交。 */ () => form.current?.submitForm()}
           >
             确认
           </Button>
@@ -82,10 +84,10 @@ export default function BasicInfoSheet({
     >
       <Form<Partial<Values>>
         initValues={initial}
-        getFormApi={(value) => {
+        getFormApi={/* 保存表单 API，供确认按钮调用。 */ (value) => {
           form.current = value;
         }}
-        onSubmit={(values) => void submit(values as Values)}
+        onSubmit={/* 将校验通过的表单值交给资源位提交流程。 */ (values) => void submit(values as Values)}
         labelPosition="top"
         style={{ width: '100%' }}
       >

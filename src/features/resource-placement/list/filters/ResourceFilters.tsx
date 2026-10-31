@@ -9,10 +9,11 @@ export const initialFilters: ListFilters = {
   resourceKey: '',
   resourceName: '',
   env: '',
-  bizId: appList.map((app) => app.value),
+  bizId: appList.map(/* 提取业务线编号作为默认筛选范围。 */ (app) => app.value),
   creator: ''
 };
 
+/** 展示资源位筛选表单，提供搜索及重置入口。 */
 export default function ResourceFilters({
   loading,
   onSearch
@@ -21,6 +22,7 @@ export default function ResourceFilters({
   onSearch: (filters: ListFilters) => void;
 }) {
   const form = useRef<FormApi<ListFilters>>();
+  /** 恢复默认筛选并立即重新搜索。 */
   const reset = () => {
     form.current?.setValues(initialFilters);
     onSearch(initialFilters);
@@ -30,10 +32,10 @@ export default function ResourceFilters({
     <div className={styles.wrapper}>
       <Form<ListFilters>
         initValues={initialFilters}
-        getFormApi={(value) => {
+        getFormApi={/* 保存筛选表单 API，供重置时回填使用。 */ (value) => {
           form.current = value;
         }}
-        onSubmit={(values) => onSearch(values as ListFilters)}
+        onSubmit={/* 将校验后的筛选值传给列表查询。 */ (values) => onSearch(values as ListFilters)}
         labelPosition="top"
       >
         <div className={styles.fields}>

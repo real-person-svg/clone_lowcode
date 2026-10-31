@@ -8,6 +8,7 @@ export interface Props {
 }
 
 // 一个单纯的Container，为了方便对一系列组件进行isShow等的统一控制
+/** 使用统一布局样式包装子控件。 */
 const Container = ({ children, style }: Props) => (
   <div style={style} className={styles['control_container']}>
     {children}

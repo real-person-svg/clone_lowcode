@@ -1,3 +1,4 @@
+/** 格式化有效 JSON 以便编辑，空白或不完整文本保持原样。 */
 export function formatJsonDocument(value: string): string {
   if (!value.trim()) return value;
   try {

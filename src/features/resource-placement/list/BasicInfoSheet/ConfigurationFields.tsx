@@ -5,6 +5,7 @@ import { fieldLabel } from '../FieldLabel';
 import { FormClientVersionLimit } from './ClientVersionLimit';
 import { FormImage } from './ImageField';
 
+/** 展示环境、示例图、业务扩展字段与客户端版本限制。 */
 export default function ConfigurationFields({
   isEdit,
   record,
@@ -39,9 +40,10 @@ export default function ConfigurationFields({
       <FormClientVersionLimit
         field="versionLimit"
         label={fieldLabel('客户端版本限制', false)}
-        validate={(value) => {
+        validate={/* 允许空限制列表，否则要求每一行填写完整且版本格式有效。 */ (value) => {
           if (!value?.length) return '';
           return value.every(
+            /** 校验单条限制的平台、比较符及三段版本格式。 */
             (row: { platform?: string; operator?: string; version?: string }) =>
               row.platform &&
               row.operator &&

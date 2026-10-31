@@ -8,10 +8,12 @@ import type {
   ResourcePlacement
 } from '@shared/types';
 export class ApiError extends Error {
+  /** 封装服务端业务错误及附加详情。 */
   constructor(message: string, public code: string, public details?: unknown) {
     super(message);
   }
 }
+/** 以统一 JSON POST 协议请求资源位 API，并转换错误响应。 */
 export async function request<T>(action: string, data: unknown): Promise<T> {
   const response = await fetch(`/api/resourcePlacementLowCode/${action}`, {
     method: 'POST',
@@ -28,29 +30,29 @@ export async function request<T>(action: string, data: unknown): Promise<T> {
   return body as T;
 }
 export const api = {
-  list: (data: ListFilters) =>
+  list: /* 请求分页资源位列表。 */ (data: ListFilters) =>
     request<PageResult<ResourcePlacement>>('list', data),
-  detail: (data: { id: number }) => request<ResourcePlacement>('detail', data),
-  create: (data: ResourceInput) => request<ResourcePlacement>('create', data),
-  update: (data: Partial<ResourceInput> & { id: number; revision?: number }) =>
+  detail: /* 请求指定资源位详情。 */ (data: { id: number }) => request<ResourcePlacement>('detail', data),
+  create: /* 提交新建资源位数据。 */ (data: ResourceInput) => request<ResourcePlacement>('create', data),
+  update: /* 提交资源位局部更新及可选修订号。 */ (data: Partial<ResourceInput> & { id: number; revision?: number }) =>
     request<ResourcePlacement>('update', data),
-  delete: (data: { id: number }) =>
+  delete: /* 请求软删除指定资源位。 */ (data: { id: number }) =>
     request<{ success: boolean }>('delete', data),
-  updateStatus: (data: { id: number; status: 0 | 1 }) =>
+  updateStatus: /* 请求切换指定资源位的启禁用状态。 */ (data: { id: number; status: 0 | 1 }) =>
     request<ResourcePlacement>('updateStatus', data),
-  publish: (data: {
+  publish: /* 请求发布泳道资源位及可选的覆盖、清理策略。 */ (data: {
     id: number;
     forcePublish?: boolean;
     deleteAfterPublish?: boolean;
   }) => request<PublishResult>('publish', data),
-  getOperationLogs: (data: {
+  getOperationLogs: /* 请求指定资源位的分页操作日志。 */ (data: {
     resourcePlacementId: number;
     page?: number;
     pageSize?: number;
   }) => request<PageResult<OperationLog>>('getOperationLogs', data),
-  roll: (data: { resourcePlacementId: number; versionId: number }) =>
+  roll: /* 请求恢复指定操作版本的快照。 */ (data: { resourcePlacementId: number; versionId: number }) =>
     request<ResourcePlacement>('roll', data),
-  getResourceConfig: (data: {
+  getResourceConfig: /* 按业务线、Key 和环境请求可用资源位配置。 */ (data: {
     resourceKey: string;
     bizId: number;
     env: string;
@@ -60,6 +62,7 @@ export const api = {
       data
     )
 };
+/** 以 multipart 表单上传资源文件，并返回文件元数据。 */
 export async function uploadAsset(file: File): Promise<Asset> {
   const data = new FormData();
   data.append('file', file);

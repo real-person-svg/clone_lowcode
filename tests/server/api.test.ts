@@ -7,12 +7,12 @@ import { createApp } from '../../server/app';
 let dir: string,
   db: ReturnType<typeof openDatabase>,
   app: ReturnType<typeof createApp>;
-beforeEach(() => {
+beforeEach(/* 为每个接口用例创建临时数据库和 Express 应用。 */ () => {
   dir = mkdtempSync(join(tmpdir(), 'resource-api-'));
   db = openDatabase(join(dir, 'resources.sqlite'));
   app = createApp(db, dir);
 });
-afterEach(() => {
+afterEach(/* 关闭用例数据库并清理临时数据目录。 */ () => {
   db.close();
   rmSync(dir, { recursive: true, force: true });
 });

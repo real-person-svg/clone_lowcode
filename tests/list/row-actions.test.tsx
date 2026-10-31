@@ -7,6 +7,7 @@ import RowActions, {
 } from '../../src/features/resource-placement/list/table/RowActions';
 import { resource } from './fixtures';
 
+/** 为每个行操作创建独立 spy，便于检查传参与触发次数。 */
 const handlers = (): RowActionHandlers => ({
   onEdit: vi.fn(),
   onConfigure: vi.fn(),

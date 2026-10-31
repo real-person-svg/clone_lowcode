@@ -10,12 +10,13 @@ import {
 } from '../../src/features/resource-placement/editor/configuration/utils';
 import { transformConfigToEditorData } from '../../src/features/resource-placement/editor/configuration/dataTransform';
 
+/** 构造可覆盖属性的最小组件实例。 */
 const component = (
   id: string,
   properties: Record<string, unknown> = {},
 ): ComponentInstance => ({ id, properties });
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(/* 每个用例后还原时间、随机数等 spy，避免相互污染。 */ () => vi.restoreAllMocks());
 
 test('component lookup returns the first preorder match and the original reference', () => {
   const first = component('match');
@@ -43,11 +44,11 @@ test('component IDs keep the existing timestamp and nine-character random suffix
 test('config import allocates IDs once per node in parent-before-child order', () => {
   const calls: string[] = [];
   let timestamp = 1000;
-  const now = vi.spyOn(Date, 'now').mockImplementation(() => {
+  const now = vi.spyOn(Date, 'now').mockImplementation(/* 记录并递增模拟时间，以检查 ID 生成调用顺序。 */ () => {
     calls.push('time');
     return ++timestamp;
   });
-  const random = vi.spyOn(Math, 'random').mockImplementation(() => {
+  const random = vi.spyOn(Math, 'random').mockImplementation(/* 记录随机数调用，并返回固定随机片段。 */ () => {
     calls.push('random');
     return 0.5;
   });
@@ -144,12 +145,12 @@ test('full-tree validation preserves preorder, node references and each error or
   const last = component('last', { type: 'Input', path: 'last' });
   const result = validateAllComponents([first, valid, last]);
   expect(result.valid).toBe(false);
-  expect(result.invalidComponents.map(({ component }) => component.id)).toEqual([
+  expect(result.invalidComponents.map(/* 提取无效组件 ID，验证错误顺序符合先序遍历。 */ ({ component }) => component.id)).toEqual([
     'first', 'nested', 'last',
   ]);
   expect(result.invalidComponents[0].component).toBe(first);
   expect(result.invalidComponents[1].component).toBe(nested);
-  expect(result.invalidComponents.map(({ errors }) => errors)).toEqual([
+  expect(result.invalidComponents.map(/* 提取错误数组，验证各组件缺失字段的提示。 */ ({ errors }) => errors)).toEqual([
     ['端上读取的字段名 不能为空'],
     ['端上读取的字段名 不能为空', '组件类型 不能为空', '标题 不能为空'],
     ['标题 不能为空'],

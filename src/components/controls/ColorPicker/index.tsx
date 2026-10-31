@@ -15,13 +15,14 @@ export interface Props {
   onChange: (value: string | undefined) => void;
 }
 
+/** 尝试将符合当前识别条件的 RGBA 文本转换为色板接受的分量对象。 */
 const getRGBAColor = (val: string | undefined) => {
   if (val && typeof val === 'string' && /^rgba\($/g.test(val)) {
     const [r, g, b, a] = val
       .replace(/^rgba\(/g, '')
       .replace(/\)/g, '')
       .split(',')
-      .map((i) => {
+      .map(/* 将颜色分量文本转换为数字。 */ (i) => {
         i.trim();
         return getNumber(i);
       });
@@ -30,7 +31,9 @@ const getRGBAColor = (val: string | undefined) => {
   return val;
 };
 
+/** 展示当前颜色，并提供色板选择及清空操作。 */
 const ColorPicker = ({ value, onChange, disabled }: Props) => {
+  /** 将色板结果转换为 RGBA 字符串通知调用方。 */
   const onHandleChange = React.useCallback(
     ({ rgb }: ColorResult) => {
       const { r, g, b, a } = rgb;
@@ -39,10 +42,12 @@ const ColorPicker = ({ value, onChange, disabled }: Props) => {
     [onChange],
   );
 
+  /** 清空已选择的颜色。 */
   const onHandleClear = React.useCallback(() => {
     onChange?.(undefined);
   }, [onChange]);
 
+  /** 根据当前值生成色板内容。 */
   const colorPickContent = React.useMemo(
     () => (
       <SketchPicker color={getRGBAColor(value)} onChange={onHandleChange} />

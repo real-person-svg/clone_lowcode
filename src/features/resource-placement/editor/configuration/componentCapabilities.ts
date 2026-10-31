@@ -1,10 +1,11 @@
 import { COMPONENT_CONFIGS } from '../library/componentConfigs';
 import type { ComponentInstance } from './types';
 
-/** Palette capability also governs imported aliases and every tree mutation. */
+/** 依据组件库能力判断类型是否允许子节点，兼容 Form 别名。 */
 export const canContainChildren = (type?: string) =>
   Boolean(COMPONENT_CONFIGS[(type || '').replace(/^Form/, '')]?.allowChildren);
 
+/** 阻止有子节点的组件切换成非容器，避免隐藏或丢失子树。 */
 export const getTypeChangeError = (
   component: ComponentInstance,
   nextType?: string,

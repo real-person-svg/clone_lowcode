@@ -36,7 +36,7 @@ it('更新与日志在同一事务，日志失败保持原值和revision', () =>
   fixture.db.exec(
     "CREATE TRIGGER reject_update BEFORE INSERT ON resource_placement_operations WHEN NEW.operation_type='UPDATE' BEGIN SELECT RAISE(ABORT,'test_log_failure'); END"
   );
-  expect(() =>
+  expect(/* 触发日志插入失败，验证资源更新也被事务撤销。 */ () =>
     fixture.service.update(resource.id, { resourceName: '不应保存' })
   ).toThrow();
   expect(fixture.service.detail(resource.id)).toEqual(resource);

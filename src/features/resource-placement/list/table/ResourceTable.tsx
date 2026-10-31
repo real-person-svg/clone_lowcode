@@ -8,6 +8,7 @@ import {
 import RowActions, { type RowActionHandlers } from './RowActions';
 import styles from './style.module.scss';
 
+/** 展示资源位数据列、分页与行操作，并按列宽计算横向滚动宽度。 */
 export default function ResourceTable({
   data,
   page,
@@ -36,14 +37,14 @@ export default function ResourceTable({
       title: '业务线',
       dataIndex: 'bizId',
       width: 120,
-      render: (v: number) => appList.find((a) => a.value === v)?.label || '-'
+      render: /* 按业务线编号展示名称，未匹配时显示占位符。 */ (v: number) => appList.find(/* 匹配当前行的业务线编号。 */ (a) => a.value === v)?.label || '-'
     },
     { title: '二级目录名称', dataIndex: 'directoryPath', width: 150 },
     {
       title: '状态',
       dataIndex: 'status',
       width: 80,
-      render: (v: number) => (
+      render: /* 根据状态展示启用或禁用文案及样式。 */ (v: number) => (
         <Typography.Text type={v === 1 ? 'success' : 'quaternary'}>
           {v === 1 ? '启用中' : '已禁用'}
         </Typography.Text>
@@ -54,20 +55,20 @@ export default function ResourceTable({
       title: '更新时间',
       dataIndex: 'updatedAt',
       width: 200,
-      render: (v: string) => new Date(v).toLocaleString()
+      render: /* 将更新时间格式化为本地时间。 */ (v: string) => new Date(v).toLocaleString()
     },
     { title: '数据来源', dataIndex: 'from', width: 100 },
     {
       title: '操作',
       width: 320,
       fixed: 'right' as const,
-      render: (_value: unknown, record: ResourcePlacement) => (
+      render: /* 为当前资源位渲染操作按钮。 */ (_value: unknown, record: ResourcePlacement) => (
         <RowActions record={record} {...actions} />
       )
     }
   ];
-  // Fixed offsets and physical column widths must use the same total.
-  const tableWidth = columns.reduce((width, column) => width + column.width, 0);
+  // 固定列偏移与横向滚动宽度使用同一列宽总和，避免固定操作列遮挡正文。
+  const tableWidth = columns.reduce(/* 累加所有列的实际宽度，与固定列偏移保持一致。 */ (width, column) => width + column.width, 0);
 
   return (
     <div className={styles.wrapper}>

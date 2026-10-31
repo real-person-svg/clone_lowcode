@@ -21,6 +21,7 @@ interface PropertyPanelProps {
   onUpdateComponent: (id: string, updates: Partial<ComponentInstance>) => void;
 }
 
+/** 展示选中组件的基础与高级属性，复用表单实例同步编辑。 */
 const PropertyPanel: React.FC<PropertyPanelProps> = ({
   selectedComponent,
   onUpdateComponent,
@@ -50,6 +51,7 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({
               labelPosition="top"
             >
               {PropertyConfigManager.getBaseProperties(displayedComponent).map(
+                /** 渲染当前组件的基础属性字段。 */
                 (property) => (
                   <PropertyField
                     key={property.key}
@@ -64,7 +66,7 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({
                   className={styles.advancedHeader}
                   role="button"
                   tabIndex={0}
-                  onClick={() => setShowHiddenAdvanced((prev) => !prev)}
+                  onClick={/* 切换高级属性面板展开状态。 */ () => setShowHiddenAdvanced(/* 根据上次状态反转高级属性可见性。 */ (prev) => !prev)}
                 >
                   <Text type="secondary">高级配置</Text>
                   <Button
@@ -87,6 +89,7 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({
                   style={{ display: showHiddenAdvanced ? 'block' : 'none' }}
                 >
                   {PropertyConfigManager.getAdvancedProperties().map(
+                    /** 渲染高级属性字段。 */
                     (property) => (
                   <PropertyField
                     key={property.key}

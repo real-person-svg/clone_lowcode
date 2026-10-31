@@ -12,6 +12,7 @@ const sizeClassNameMap = {
   small: styles.small,
 };
 
+/** 按指定尺寸展示控件标题。 */
 const ControlTitle = ({ value, size = 'default' }: TitleProps) => (
   <div className={`${styles['control_title']} ${sizeClassNameMap[size]}`}>
     {value}

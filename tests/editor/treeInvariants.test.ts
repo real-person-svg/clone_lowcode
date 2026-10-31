@@ -10,6 +10,7 @@ import {
 } from '../../src/features/resource-placement/editor/state/componentTree';
 import { getTypeChangeError } from '../../src/features/resource-placement/editor/configuration/componentCapabilities';
 import type { ComponentInstance } from '../../src/features/resource-placement/editor/configuration/types';
+/** 创建带有效类型、路径和标题的叶子节点。 */
 const leaf = (id: string): ComponentInstance => ({
   id,
   properties: { type: 'FormInput', path: id, label: id },
@@ -41,9 +42,9 @@ test.each([
     const withLeaf = [...reopened, leaf('second')];
     const moved = moveTreeNode(withLeaf, 'second', reopened[0].id, 'inside');
     expect(moved).toHaveLength(1);
-    expect(moved[0].children!.map((node) => node.id)).toEqual(['second']);
+    expect(moved[0].children!.map(/* 提取原空容器接纳 second 后的子节点 ID，验证移入结果。 */ (node) => node.id)).toEqual(['second']);
     expect(moved[0].children![0].parent).toBe(reopened[0].id);
-    expect(() => transformEditorDataToConfig(moved)).not.toThrow();
+    expect(/* 导出原空容器接纳子节点后的树，验证仍满足配置契约。 */ () => transformEditorDataToConfig(moved)).not.toThrow();
   },
 );
 test('a leaf with legacy empty children never receives inserted or moved children', () => {
@@ -87,10 +88,10 @@ test('type changes preserve subtrees and normalize both leaf/container direction
     JSON.stringify(transformEditorDataToConfig(withChild)),
   );
   expect(reopened[0].children).toHaveLength(1);
-  const empty = updateTreeNode(withChild, 'child', () => null);
+  const empty = updateTreeNode(withChild, 'child', /* 用空结果从容器中删除子节点。 */ () => null);
   const backToLeaf = patchTreeNode(empty, 'input', {
     properties: { ...input.properties, type: 'FormInput' },
   });
   expect(backToLeaf[0].children).toBeUndefined();
-  expect(() => transformEditorDataToConfig(backToLeaf)).not.toThrow();
+  expect(/* 导出切回叶子的节点，验证无残留 children。 */ () => transformEditorDataToConfig(backToLeaf)).not.toThrow();
 });

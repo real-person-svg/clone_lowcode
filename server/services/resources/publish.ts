@@ -3,7 +3,7 @@ import type { ResourceRepository } from '../../repositories/resources';
 import { ServiceError } from '../../errors';
 import { getUpdateMetadata } from './metadata';
 
-// The caller owns the transaction that also protects source cleanup and logs.
+/** 检测线上覆盖冲突并发布配置，按选项软删除来源；事务由调用方负责。 */
 export function publishResource(
   repository: ResourceRepository,
   source: ResourcePlacement,
@@ -21,6 +21,7 @@ export function publishResource(
     'online'
   );
 
+  // 线上更新晚于泳道创建表示可能覆盖后续修改，先返回冲突；强制发布时跳过此确认。
   if (online && !forcePublish && online.updatedAt > source.createdAt) {
     return {
       success: false,
@@ -34,6 +35,7 @@ export function publishResource(
   }
 
   const time = now();
+  // 覆盖时沿用线上记录的 ID、创建信息和修订序列；首次上线则建立新记录。
   const next = online
     ? repository.save({
         ...source,
@@ -62,6 +64,7 @@ export function publishResource(
     operator
   );
 
+  // 来源清理采用软删除，并与线上写入、发布日志共用调用方事务和本次时间戳。
   if (deleteAfterPublish) {
     repository.save({
       ...source,

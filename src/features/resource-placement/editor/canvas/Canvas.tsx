@@ -28,6 +28,7 @@ interface CanvasProps {
   onAddComponent: AddComponentHandler;
 }
 
+/** 展示组件树画布，提供表单、选择上下文及根级拖放入口。 */
 const Canvas: React.FC<CanvasProps> = ({
   components,
   selectionStore,
@@ -39,7 +40,7 @@ const Canvas: React.FC<CanvasProps> = ({
 }) => {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: 'component',
-    drop: (item: DragItem, monitor) => {
+    drop: /* 仅在子节点尚未处理放置时，将组件库的新组件添加到根层。 */ (item: DragItem, monitor) => {
       if (
         !monitor.didDrop() &&
         item.type === 'component' &&
@@ -49,12 +50,13 @@ const Canvas: React.FC<CanvasProps> = ({
         onAddComponent(item.componentType);
       }
     },
-    collect: (monitor) => ({
+    collect: /* 收集画布浅层悬停与可放置状态，用于视觉反馈。 */ (monitor) => ({
       isOver: monitor.isOver({ shallow: true }),
       canDrop: monitor.canDrop(),
     }),
   });
 
+  /** 点击画布空白区域时清除组件选择。 */
   const handleCanvasClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     const currentTarget = e.currentTarget as HTMLElement;
@@ -95,7 +97,7 @@ const Canvas: React.FC<CanvasProps> = ({
         <CanvasProfiler>
           <div className={styles.canvasContent}>
             <CanvasForm>
-              {components.map((component, index) => (
+              {components.map(/* 按组件树顺序渲染根级组件及编辑操作。 */ (component, index) => (
                 <ComponentRenderer
                   key={component.id}
                   component={component}

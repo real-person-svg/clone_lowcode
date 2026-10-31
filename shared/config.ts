@@ -30,12 +30,13 @@ const controlTypes = new Set([
   'StarlingSchema'
 ]);
 const unsafeSegments = new Set(['__proto__', 'constructor', 'prototype']);
+/** 拒绝字段路径中的原型相关段，避免不安全的对象路径访问。 */
 function safePath(value: string) {
   return !value
     .split(/[.\[\]]+/)
-    .some((segment) => unsafeSegments.has(segment));
+    .some(/* 检测当前路径段是否属于禁止访问的名称。 */ (segment) => unsafeSegments.has(segment));
 }
-/** The same structural contract guards JSON imports and persisted configuration. Function text is executed only by the local preview runtime. */
+/** 校验导入和持久化配置共用的结构契约，不执行配置中的函数文本。 */
 export function validateConfig(
   value: unknown
 ): asserts value is ResourceConfig {
@@ -46,7 +47,9 @@ export function validateConfig(
     !Array.isArray((value as ResourceConfig).content)
   )
     throw new Error('配置必须是包含 content 数组的对象');
+  // 递归共用节点计数，分别限制整棵树的规模和单条路径深度，避免过大配置消耗资源。
   let count = 0;
+  /** 递归校验节点类型、属性和容器结构，并限制总节点数与深度。 */
   function check(nodes: unknown[], depth: number) {
     if (depth > 50) throw new Error('配置嵌套层级超过 50');
     for (const raw of nodes) {
@@ -70,6 +73,7 @@ export function validateConfig(
       ])
         if (node[field] !== undefined && typeof node[field] !== 'string')
           throw new Error(`${field} 必须是字符串`);
+      // key/path 可被表单按对象路径访问，需同时拦截点号与括号语法中的危险路径段。
       for (const field of ['key', 'path'])
         if (typeof node[field] === 'string' && !safePath(node[field] as string))
           throw new Error(`${field} 包含不允许的路径段`);
@@ -94,7 +98,7 @@ export function validateConfig(
           !(
             typeof tuple[0] === 'string' ||
             (Array.isArray(tuple[0]) &&
-              tuple[0].every((item) => typeof item === 'string'))
+              tuple[0].every(/* 确保异步注入的每个上下文名称都是字符串。 */ (item) => typeof item === 'string'))
           )
         )
           throw new Error('asyncInject 必须是 [string | string[], string]');
@@ -122,6 +126,7 @@ export function validateConfig(
   }
   check((value as ResourceConfig).content, 0);
 }
+/** 解析 JSON 或对象配置，空文本使用空配置，并执行结构校验。 */
 export function parseConfig(value: unknown): ResourceConfig {
   const parsed: unknown =
     typeof value === 'string'

@@ -15,6 +15,7 @@ interface DraggableComponentProps {
   onAddComponent: AddComponentHandler;
 }
 
+/** 展示可拖拽的组件库条目，也支持点击添加。 */
 const DraggableComponent: React.FC<DraggableComponentProps> = ({
   config,
   onAddComponent,
@@ -26,11 +27,12 @@ const DraggableComponent: React.FC<DraggableComponentProps> = ({
       componentType: config.type,
       name: config.name,
     },
-    collect: (monitor) => ({
+    collect: /* 收集组件库条目的拖动状态。 */ (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
+  /** 点击时将该类型的新组件添加到画布。 */
   const handleClick = () => {
     onAddComponent(config.type);
   };
@@ -51,10 +53,12 @@ interface ComponentLibraryProps {
   onAddComponent: AddComponentHandler;
 }
 
+/** 按类别展示可供添加的组件库。 */
 const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
   onAddComponent,
 }) => {
   // 按类别分组组件
+  /** 将注册组件分组为布局组件和输入控件。 */
   const componentsByCategory = React.useMemo(() => {
     const categories: Record<
       string,
@@ -64,7 +68,7 @@ const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
       input: { name: '输入控件', components: [] as ComponentType[] },
     };
 
-    Object.values(COMPONENT_CONFIGS).forEach((config) => {
+    Object.values(COMPONENT_CONFIGS).forEach(/* 将组件加入其已定义的分类。 */ (config) => {
       if (categories[config.category]) {
         categories[config.category].components.push(config);
       }
@@ -81,10 +85,10 @@ const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
 
       <div className={styles.libraryContent}>
         <Collapse defaultActiveKey={['layout', 'input', 'business', 'display']}>
-          {Object.entries(componentsByCategory).map(([key, category]) => (
+          {Object.entries(componentsByCategory).map(/* 为每个组件分类渲染折叠面板。 */ ([key, category]) => (
             <Panel key={key} header={category.name} itemKey={key}>
               <div className={styles.componentGrid}>
-                {category.components.map((config) => (
+                {category.components.map(/* 在分类内渲染可拖拽组件条目。 */ (config) => (
                   <DraggableComponent
                     key={config.type}
                     config={config}

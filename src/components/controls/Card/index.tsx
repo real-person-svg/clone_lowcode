@@ -26,6 +26,7 @@ const sizeClassNameMap = {
   small: styles.small,
 };
 
+/** 渲染带标题、提示和可选折叠能力的内容卡片。 */
 const Card = ({
   title,
   children,
@@ -36,6 +37,7 @@ const Card = ({
   tips,
 }: Props) => {
   const [isOpen, setOpen] = useState(true);
+  /** 切换卡片内容的展开状态。 */
   const toggle = () => {
     setOpen(!isOpen);
   };

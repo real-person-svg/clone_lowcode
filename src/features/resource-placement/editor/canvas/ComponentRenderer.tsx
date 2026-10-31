@@ -29,6 +29,7 @@ export interface ComponentRendererProps {
   onAddComponent: AddComponentHandler;
 }
 
+/** 为组件内容提供选择、拖拽、放置指示和删除工具栏。 */
 const ComponentRenderer: React.FC<ComponentRendererProps> = ({
   component,
   index,
@@ -55,7 +56,7 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
       id: component.id,
       index,
     },
-    collect: (monitor) => ({
+    collect: /* 收集当前节点的拖动状态。 */ (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
@@ -66,7 +67,7 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
     { isOver: boolean; dropPosition: 'before' | 'after' | 'inside' }
   >({
     accept: 'component',
-    hover: (item: DragItem, monitor: DropTargetMonitor<DragItem, unknown>) => {
+    hover: /* 根据当前指针计算悬停位置，只处理最内层命中的目标。 */ (item: DragItem, monitor: DropTargetMonitor<DragItem, unknown>) => {
       const el = nodeRef.current;
       if (!el) {
         return;
@@ -90,11 +91,13 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
         ),
       );
     },
-    drop: (item: DragItem, monitor) => {
+    drop: /* 根据放下时的指针移动现有节点或插入新组件，避免重复处理。 */ (item: DragItem, monitor) => {
+      // 嵌套目标已完成放置时，父目标不再重复移动或插入同一组件。
       if (monitor.didDrop()) {
         return undefined;
       }
 
+      // 放下动作读取实时指针和矩形；悬停状态只画指示线，可能尚未提交或已过期。
       const position =
         getDropPosition(
           nodeRef.current?.getBoundingClientRect() ?? null,
@@ -126,13 +129,14 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
 
       return undefined;
     },
-    collect: (monitor) => ({
+    collect: /* 收集浅层悬停状态和当前放置指示位置。 */ (monitor) => ({
       isOver: monitor.isOver({ shallow: true }),
       dropPosition: currentDropPosition || 'after',
     }),
   });
 
   // 回调 ref 合并 drag 和 drop
+  /** 将同一个 DOM 节点同时注册为拖动源和放置目标。 */
   const setRefs = React.useCallback(
     (node: HTMLDivElement | null) => {
       nodeRef.current = node;
@@ -142,6 +146,7 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
     [drag, drop],
   );
 
+  /** 选中当前组件，并阻止点击冒泡到父节点。 */
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelectComponent(component.id);
@@ -163,17 +168,17 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
           <div className={styles.toolbarActions}>
             <Popconfirm
               title="确定要删除这个组件吗？"
-              onConfirm={(e) => {
+              onConfirm={/* 确认删除当前组件，并避免误选父节点。 */ (e) => {
                 e?.stopPropagation();
                 onRemoveComponent(component.id);
               }}
-              onCancel={(e) => e?.stopPropagation()}
+              onCancel={/* 取消删除时阻止事件继续冒泡。 */ (e) => e?.stopPropagation()}
             >
               <Button
                 icon={<IconDelete />}
                 style={{ color: 'white', height: '100%' }}
                 size="small"
-                onClick={(e) => e.stopPropagation()}
+                onClick={/* 点击删除按钮时避免触发组件选中逻辑。 */ (e) => e.stopPropagation()}
               />
             </Popconfirm>
           </div>

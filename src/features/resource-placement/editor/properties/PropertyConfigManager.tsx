@@ -25,12 +25,13 @@ export class PropertyConfigManager {
   /**
    * 获取基础必填属性
    */
+  /** 根据组件类型和容器约束生成基础属性表单定义。 */
   static getBaseProperties(
     selectedComponent: ComponentInstance,
   ): PropertyConfig[] {
     const currentComponentType = selectedComponent?.properties?.type;
     const required = new Set(
-      getRequiredPropertyFields(selectedComponent).map((field) => field.key),
+      getRequiredPropertyFields(selectedComponent).map(/* 提取当前组件必填属性的字段名。 */ (field) => field.key),
     );
     return [
       {
@@ -61,13 +62,13 @@ export class PropertyConfigManager {
           ? '当前组件包含子组件，请先移出或删除子组件后再切换为非容器类型'
           : undefined,
         props: {
-          optionList: componentOptions.map((option) => ({
+          optionList: componentOptions.map(/* 有子节点时禁用会丢失容器能力的类型选项。 */ (option) => ({
             ...option,
             disabled:
               Boolean(selectedComponent.children?.length) &&
               !canContainChildren(option.value),
           })),
-          onChange: (newType: string, form: any) => {
+          onChange: /* 类型切换通过约束检查后，将相关高级属性重置为新类型默认值。 */ (newType: string, form: any) => {
             if (getTypeChangeError(selectedComponent, newType)) return;
             form.current.setValue(
               'cProps',
@@ -136,7 +137,7 @@ export class PropertyConfigManager {
         component: FormCodeEditor,
         tips: '可配置 semi-ui 支持的组件原生props，以 JSON 格式输入',
       },
-    ].filter((item): item is NonNullable<typeof item> =>
+    ].filter(/* 移除当前类型无需展示的属性项。 */ (item): item is NonNullable<typeof item> =>
       Boolean(item),
     ) as PropertyConfig[];
   }
@@ -144,6 +145,7 @@ export class PropertyConfigManager {
   /**
    * 获取可选高级属性
    */
+  /** 返回可选的校验、格式化、异步注入和联动属性定义。 */
   static getAdvancedProperties(): PropertyConfig[] {
     return [
       {

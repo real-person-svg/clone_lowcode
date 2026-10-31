@@ -4,6 +4,7 @@ import { appList } from '@shared/types';
 import { fieldLabel } from '../FieldLabel';
 import type { SheetMode } from './values';
 
+/** 根据新建、编辑或子版本模式展示资源身份字段及编辑限制。 */
 export default function IdentityFields({ mode }: { mode: SheetMode }) {
   const isChild = mode === 'child';
   const isEdit = mode === 'edit';

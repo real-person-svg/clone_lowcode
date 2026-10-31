@@ -8,7 +8,9 @@ export interface Props extends Omit<InputProps, 'onChange'> {
   onChange: (v: string) => void;
 }
 
+/** 包装文本输入框，在失焦时去除首尾空白。 */
 const ControlInput = (props: Props) => {
+  /** 将去除首尾空白的输入值通知表单。 */
   const onBlur = React.useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       const { value } = e.target;

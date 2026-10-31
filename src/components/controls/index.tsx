@@ -57,6 +57,7 @@ for (const [
   { C, valueKey = 'value', changeKey = 'onChange', valuePath, layout },
 ] of Object.entries(controls)) {
   controlLib[name] = { C, type: layout ? 'NO_INTERACTIVE' : 'INTERACTIVE' };
+  /** 适配原生控件与表单，处理输入输出格式化及字段联动。 */
   const Middleware: AnyControl = ({
     inputFormat,
     outputFormat,
@@ -72,9 +73,10 @@ for (const [
         {...props}
         {...{
           [valueKey]: value,
-          [changeKey]: (raw: unknown) => {
+          [changeKey]: /* 发布格式化后的字段值，并用原始值执行配置联动。 */ (raw: unknown) => {
             const output =
               typeof outputFormat === 'function' ? outputFormat(raw) : raw;
+            // 字段值与本地持久化使用格式化结果，跨字段联动仍接收控件原始值和表单 API。
             props[changeKey]?.(output);
             onLocalValueChange?.(output);
             if (typeof onChangeState === 'function')
@@ -94,5 +96,5 @@ for (const [
   };
 }
 export const controlNameEnum = Object.fromEntries(
-  Object.keys(controlLib).map((key) => [key, key]),
+  Object.keys(controlLib).map(/* 生成控件名称到自身名称的枚举映射。 */ (key) => [key, key]),
 );

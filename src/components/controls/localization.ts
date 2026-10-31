@@ -1,5 +1,6 @@
 /** Chinese fallback copy from the source controls; there is no platform translation request. */
 export const I18n = {
+  /** 选取本地回退文案并替换命名参数，不请求翻译平台。 */
   t(
     key: string,
     paramsOrFallback: Record<string, unknown> | string = {},
@@ -9,7 +10,7 @@ export const I18n = {
     const text =
       fallback ??
       (typeof paramsOrFallback === 'string' ? paramsOrFallback : key);
-    return text.replace(/\{([^}]+)\}/g, (_, name: string) =>
+    return text.replace(/\{([^}]+)\}/g, /* 替换文案中的参数占位符，缺失参数时保留原占位符。 */ (_, name: string) =>
       String(params[name] ?? `{${name}}`),
     );
   },

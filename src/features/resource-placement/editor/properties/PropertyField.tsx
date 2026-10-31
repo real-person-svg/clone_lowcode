@@ -6,6 +6,7 @@ import type { ComponentInstance, PropertyConfig } from '../configuration/types';
 
 const { Text } = Typography;
 
+/** 根据属性定义渲染字段、必填规则和提示，绑定独立代码文档。 */
 export default function PropertyField({ property, displayedComponent, form }: {
   property: PropertyConfig;
   displayedComponent: ComponentInstance;
@@ -55,7 +56,7 @@ export default function PropertyField({ property, displayedComponent, form }: {
           : {})}
         style={{ width: '100%' }}
         {...props}
-        onChange={(newVal: any) => props?.onChange?.(newVal, form)}
+        onChange={/* 将字段变化与表单引用传给该属性的自定义联动逻辑。 */ (newVal: any) => props?.onChange?.(newVal, form)}
       />
       {key === 'type' && Boolean(displayedComponent.children?.length) && (
         <Text type="secondary" size="small">

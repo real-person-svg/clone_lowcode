@@ -1,6 +1,7 @@
 import type { ResourceRepository } from '../../repositories/resources';
 import { ServiceError } from '../../errors';
 
+/** 检查业务线、环境和 Key 的唯一性，更新时可排除自身。 */
 export function ensureUniqueResource(
   repository: ResourceRepository,
   data: { bizId: number; resourceKey: string; env: string },

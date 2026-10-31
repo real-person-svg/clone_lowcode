@@ -21,6 +21,7 @@ export interface Values {
   versionLimit?: { platform?: string; operator?: string; version?: string }[];
 }
 
+/** 根据侧栏模式生成初始表单值，并还原序列化的版本限制。 */
 export function initialValues(mode: SheetMode, record?: ResourcePlacement) {
   return {
     showFrequencyControl: 0,
@@ -35,6 +36,7 @@ export function initialValues(mode: SheetMode, record?: ResourcePlacement) {
   };
 }
 
+/** 将表单值转换为 API 输入，按复制和子版本规则处理身份与配置。 */
 export function resourceInput(
   mode: SheetMode,
   values: Values,
@@ -53,6 +55,7 @@ export function resourceInput(
     extra: record?.extra ?? null
   } as ResourceInput;
 
+  // 子版本沿用父资源基础信息但重新生成身份并清空配置；复制则解除父子关系。
   if (mode === 'child') {
     Object.assign(data, {
       ...record,

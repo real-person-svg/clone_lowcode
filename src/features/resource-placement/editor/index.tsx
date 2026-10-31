@@ -12,6 +12,7 @@ import styles from './page/style.module.scss';
 
 const { Sider, Content } = Layout;
 
+/** 组装资源位编辑页面，展示加载状态、组件库、画布、属性和代码编辑入口。 */
 export default function ResourcePlacementLowCodeEditor() {
   const editor = useEditorSession();
   const resource = editor.curResourceDetail;
